@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Salão</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; }
+        .hidden { display: none; }
+        .fade-in { animation: fadeIn 0.4s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <!-- Notificação Toast -->
+    <div id="toast" class="hidden fixed top-5 right-5 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+        <span id="toast-msg"></span>
+    </div>
+
+    <!-- TELA DE LOGIN -->
+    <div id="app-login" class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md fade-in border border-gray-100">
+            <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Bem-vindo</h2>
+            <p class="text-center text-gray-500 mb-8">Sistema de Gestão de Salão</p>
+            
+            <div id="form-login" class="space-y-5">
+                <input type="email" id="login-email" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="seu@email.com">
+                <input type="password" id="login-senha" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="••••••••">
+                <button onclick="fazerLogin()" class="w-full py-3 px-4 rounded-lg text-white font-bold bg-blue-600 hover:bg-blue-700">Entrar</button>
+                <p class="mt-4 text-center text-sm text-gray-600 cursor-pointer" onclick="toggleForms()">Criar conta nova</p>
+            </div>
+
+            <div id="form-cadastro" class="hidden space-y-4">
+                <input type="text" id="cad-nome" placeholder="Nome Completo" class="block w-full px-4 py-3 border rounded-lg">
+                <input type="email" id="cad-email" placeholder="E-mail" class="block w-full px-4 py-3 border rounded-lg">
+                <input type="password" id="cad-senha" placeholder="Senha" class="block w-full px-4 py-3 border rounded-lg">
+                <select id="cad-tipo" class="block w-full px-4 py-3 border rounded-lg bg-white">
+                    <option value="cliente">Sou Cliente</option>
+                    <option value="funcionario">Sou Funcionário</option>
+                    <option value="gerente">Sou Gerente</option>
+                </select>
+                <button onclick="fazerCadastro()" class="w-full py-3 rounded-lg text-white font-bold bg-green-600 hover:bg-green-700">Registar</button>
+                <button onclick="toggleForms()" class="w-full py-3 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200">Voltar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- DASHBOARD (PAINEL PRINCIPAL) -->
+    <div id="app-dashboard" class="hidden min-h-screen">
+        <nav class="bg-white shadow-md sticky top-0 z-40">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <span class="font-bold text-xl text-blue-600 flex items-center">SalãoApp</span>
+                    <div class="flex items-center space-x-4">
+                        <span id="user-welcome" class="text-gray-800 text-sm font-bold"></span>
+                        <button onclick="fazerLogout()" class="text-red-600 hover:text-red-800 text-sm font-bold">Sair</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
+            <!-- ÁREA DO GERENTE -->
+            <div id="area-gerente" class="hidden space-y-6">
+                <h1 class="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="font-bold">Faturamento</h3><p id="rel-faturamento">R$ 0.00</p></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="font-bold">Comissões</h3><p id="rel-comissoes">R$ 0.00</p></div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="font-bold">Lucro</h3><p id="rel-lucro">R$ 0.00</p></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                    <h3 class="text-lg font-bold mb-4">Gerir Agenda</h3>
+                    <div id="lista-agendamentos-gerente" class="space-y-2"></div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                    <h3 class="text-lg font-bold mb-4">Adicionar Serviço</h3>
+                    <input id="serv-nome" placeholder="Nome (ex: Corte)" class="w-full border rounded-lg p-2 mb-2">
+                    <input id="serv-valor" type="number" placeholder="Valor (R$)" class="w-full border rounded-lg p-2 mb-2">
+                    <input id="serv-comissao" type="number" placeholder="Comissão (%)" class="w-full border rounded-lg p-2 mb-2" value="20">
+                    <button onclick="adicionarServico()" class="w-full bg-blue-600 text-white p-2 rounded-lg">Salvar Serviço</button>
+                </div>
+            </div>
+
+            <!-- ÁREA DO CLIENTE -->
+            <div id="area-cliente" class="hidden space-y-6">
+                <h1 class="text-2xl font-bold text-gray-900">Meu Espaço</h1>
+                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                    <h3 class="text-lg font-bold mb-4">Marcar Horário</h3>
+                    <div class="space-y-4">
+                        <select id="agend-servico" class="w-full border rounded-lg p-2.5 bg-white"></select>
+                        <select id="agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white"></select>
+                        <input type="datetime-local" id="agend-data" class="w-full border rounded-lg p-2">
+                        <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold">Confirmar</g-button>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                    <h3 class="text-lg font-bold mb-4">Meus Agendamentos</h3>
+                    <div id="meus-agendamentos-lista" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- ÁREA DO FUNCIONÁRIO -->
+            <div id="area-funcionario" class="hidden space-y-6">
+                <h1 class="text-2xl font-bold text-gray-900">Portal do Funcionário</h1>
+                <div class="bg-white p-6 rounded-xl shadow-sm border">
+                    <h3 class="font-bold">Minha Comissão</h3>
+                    <p id="func-comissao" class="text-2xl font-bold text-green-600">R$ 0.00</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- INÍCIO DO CÓDIGO JAVASCRIPT (O "FRONTEND") -->
+    <!-- ========================================== -->
+    <script>
+        // Guarda o estado do utilizador logado
+        let currentUser = null;
+        lucide.createIcons(); // Ativa os ícones
+
+        // --- Funções de UI (Mostrar/Esconder) ---
+        function mostrarToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3000);
+        }
+
+        function toggleForms() {
+            document.getElementById('form-login').classList.toggle('hidden');
+            document.getElementById('form-cadastro').classList.toggle('hidden');
+        }
+
+        function fazerLogout() {
+            currentUser = null;
+            localStorage.removeItem('salaoUser');
+            location.reload();
+        }
+
+        function showDashboard() {
+            document.getElementById('app-login').classList.add('hidden');
+            document.getElementById('app-dashboard').classList.remove('hidden');
+            document.getElementById('user-welcome').innerText = `Olá, ${currentUser.nome} (${currentUser.tipo_conta})`;
+
+            // Esconde todos os painéis
+            document.getElementById('area-gerente').classList.add('hidden');
+            document.getElementById('area-cliente').classList.add('hidden');
+            document.getElementById('area-funcionario').classList.add('hidden');
+
+            // Mostra o painel correto
+            if (currentUser.tipo_conta === 'gerente') {
+                document.getElementById('area-gerente').classList.remove('hidden');
+                carregarDadosGerente();
+            } else if (currentUser.tipo_conta === 'cliente') {
+                document.getElementById('area-cliente').classList.remove('hidden');
+                carregarDadosCliente();
+            } else if (currentUser.tipo_conta === 'funcionario') {
+                document.getElementById('area-funcionario').classList.remove('hidden');
+                carregarDadosFuncionario();
+            }
+        }
+
+        // --- Funções de API (Falam com o Python) ---
+
+        async function fazerLogin() {
+            const email = document.getElementById('log-email').value;
+            const senha = document.getElementById('log-pass').value;
+
+            // O JS chama a API /api/login que está no Python
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ email, senha })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                currentUser = data.user;
+                localStorage.setItem('salaoUser', JSON.stringify(data.user)); // Salva sessão
+                showDashboard();
+            } else {
+                mostrarToast(data.message);
+            }
+        }
+
+        async function fazerCadastro() {
+            const nome = document.getElementById('cad-nome').value;
+            const email = document.getElementById('cad-email').value;
+            const senha = document.getElementById('cad-pass').value;
+            const tipo = document.getElementById('cad-tipo').value;
+
+            // O JS chama a API /api/register
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nome, email, senha, tipo_conta: tipo })
+            });
+            
+            mostrarToast("Conta criada! Por favor, faça login.");
+            toggleForms();
+        }
+
+        // --- Funções de Carregamento de Dados ---
+        
+        async function carregarDadosGerente() {
+            // Carrega relatórios
+            const resRel = await fetch('/api/relatorio/geral');
+            const rel = await resRel.json();
+            document.getElementById('rel-faturamento').innerText = `R$ ${rel.faturamento_total.toFixed(2)}`;
+            document.getElementById('rel-comissoes').innerText = `R$ ${rel.total_comissoes.toFixed(2)}`;
+            document.getElementById('rel-lucro').innerText = `R$ ${rel.lucro_bruto.toFixed(2)}`;
+            
+            // Carrega agenda
+            carregarAgendaGerente();
+        }
+
+        async function carregarDadosCliente() {
+            carregarListasAgendamento();
+            carregarAgendaCliente();
+        }
+        
+        async function carregarDadosFuncionario() {
+            const res = await fetch(`/api/relatorio/funcionario/${currentUser.id}`);
+            const rel = await res.json();
+            document.getElementById('func-comissao').innerText = `R$ ${rel.comissao_total.toFixed(2)}`;
+        }
+
+        async function carregarListasAgendamento() {
+            // Carregar Serviços
+            const resServ = await fetch('/api/servicos');
+            const servs = await resServ.json();
+            const selServ = document.getElementById('agend-servico');
+            selServ.innerHTML = '<option value="">Escolha o serviço</option>';
+            if (servs) {
+                for (let id in servs) {
+                    selServ.innerHTML += `<option value="${id}">${servs[id].nome} (R$ ${servs[id].valor})</option>`;
+                }
+            }
+            // Carregar Funcionários (simplificado, pega todos)
+            const resFunc = await fetch('/api/login', { method: 'POST', body: JSON.stringify({}) }); // Truque para pegar todos
+            const funcs = (await resFunc.json()).users || {}; // Assumindo que a API retorna todos os users
+            const selFunc = document.getElementById('agend-funcionario');
+            selFunc.innerHTML = '<option value="">Escolha o profissional</option>';
+            // NOTA: A API /api/login precisaria ser ajustada para retornar todos os funcionários
+            // Vamos simplificar e usar um funcionário estático por agora
+            selFunc.innerHTML += `<option value="id_func_exemplo">Funcionário Exemplo</option>`;
+        }
+
+        async function adicionarServico() {
+            const nome = document.getElementById('serv-nome').value;
+            const valor = parseFloat(document.getElementById('serv-valor').value);
+            const comissao = parseInt(document.getElementById('serv-comissao').value);
+
+            await fetch('/api/servicos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ nome, valor, comissao_percentual: comissao })
+            });
+            mostrarToast("Serviço adicionado!");
+        }
+
+        async function marcarAgendamento() {
+            const servicoId = document.getElementById('agend-servico').value;
+            const funcionarioId = "id_func_exemplo"; // Simplificado
+            const dataHora = document.getElementById('agend-data').value;
+            
+            if (!servicoId || !dataHora) return mostrarToast("Preencha todos os campos.");
+
+            // Pega os nomes para salvar
+            const servicos = await (await fetch('/api/servicos')).json();
+            
+            const dadosAgendamento = {
+                id_cliente: currentUser.id,
+                nome_cliente: currentUser.nome,
+                id_funcionario: funcionarioId,
+                nome_funcionario: "Funcionário Exemplo",
+                id_servico: servicoId,
+                nome_servico: servicos[servicoId].nome,
+                valor_servico: servicos[servicoId].valor,
+                data_agendamento: dataHora.replace('T', ' ') // Formata AAAA-MM-DD HH:MM
+            };
+
+            await fetch('/api/agendamentos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(dadosAgendamento)
+            });
+            mostrarToast("Agendado com sucesso!");
+            carregarAgendaCliente();
+        }
+        
+        async function carregarAgendaGerente() {
+            const res = await fetch('/api/agendamentos');
+            const dados = await res.json();
+            const div = document.getElementById('lista-agendamentos-gerente');
+            div.innerHTML = ''; // Limpa a lista
+            
+            let temPendentes = false;
+            for (let id in dados) {
+                const ag = dados[id];
+                if (ag.status === 'agendado') {
+                    temPendentes = true;
+                    div.innerHTML += `
+                        <div class="flex justify-between items-center border-b p-2">
+                            <span>${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
+                            <div class="flex-shrink-0">
+                                <button onclick="mudarStatus('${id}', 'concluido')" class="text-green-600 text-xs font-bold mr-2">Concluir</button>
+                                <button onclick="mudarStatus('${id}', 'cancelado')" class="text-red-600 text-xs font-bold">Cancelar</button>
+                            </div>
+                        </div>`;
+                }
+            }
+            if (!temPendentes) div.innerHTML = "<p class='text-gray-500'>Nenhum agendamento pendente.</p>";
+        }
+        
+        async function carregarAgendaCliente() {
+            const res = await fetch('/api/agendamentos');
+            const dados = await res.json();
+            const div = document.getElementById('meus-agendamentos-lista');
+            div.innerHTML = '';
+            let temMeus = false;
+            for (let id in dados) {
+                const ag = dados[id];
+                if (ag.id_cliente === currentUser.id) {
+                    temMeus = true;
+                    div.innerHTML += `
+                        <div class="border-b p-2">
+                            <p class="font-bold">${ag.nome_servico}</p>
+                            <p class="text-sm">${ag.data_agendamento} - Status: ${ag.status}</p>
+                        </div>`;
+                }
+            }
+            if (!temMeus) div.innerHTML = "<p class='text-gray-500'>Sem agendamentos.</p>";
+        }
+
+        async function mudarStatus(id, status) {
+            await fetch('/api/agendamentos/update', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id, status })
+            });
+            mostrarToast("Status atualizado!");
+            carregarAgendaGerente();
+            carregarRelatorios(); // Atualiza o faturamento
+        }
+        
+        // Verifica se o utilizador já está logado
+        window.onload = () => {
+            const user = localStorage.getItem('salaoUser');
+            if (user) {
+                currentUser = JSON.parse(user);
+                showDashboard();
+            }
+        };
+
+    </script>
+</body>
+</html>
