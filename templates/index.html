@@ -56,7 +56,7 @@
                 <input type="email" id="login-email" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="seu@email.com">
                 <input type="password" id="login-senha" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="••••••••">
                 
-                <!-- !! MUDANÇA: Adicionada animação de clique e cor mais escura !! -->
+                <!-- Botões com animação de clique -->
                 <button onclick="fazerLogin()" class="w-full py-3 px-4 rounded-lg text-white font-bold bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-all transform active:scale-95">
                     Entrar
                 </button>
@@ -102,9 +102,9 @@
             <div id="area-gerente" class="hidden space-y-6">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Painel Administrativo</h1>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Faturamento</h3><p id="rel-faturamento" class="text-2xl font-bold text-green-600">R$ 0.00</p></div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Comissões</h3><p id="rel-comissoes" class="text-2xl font-bold text-orange-500">R$ 0.00</p></div>
-                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Lucro</h3><p id="rel-lucro" class="text-2xl font-bold text-blue-600">R$ 0.00</p></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Faturamento</h3><p id="rel-faturamento">R$ 0.00</p></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Comissões</h3><p id="rel-comissoes">R$ 0.00</p></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Lucro</h3><p id="rel-lucro">R$ 0.00</p></div>
                 </div>
                 
                 <div class="border-b border-gray-200 dark:border-gray-700">
@@ -388,7 +388,7 @@
                         const itemHtml = `
                             <div class="border-b p-2 dark:border-gray-700">
                                 <p class="font-bold dark:text-white">${ag.nome_servico} - ${ag.nome_cliente}</p>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">${formatarData(ag.data_agendamento)}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">${ag.data_agendamento}</p>
                             </div>`;
                         
                         if (ag.status === 'agendado') {
@@ -400,7 +400,7 @@
                 }
             }
             if (divPendentes.innerHTML === '') divPendentes.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum horário pendente.</p>";
-            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum atendimento concluído.</p>";
+            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class'text-gray-500 dark:text-gray-400'>Nenhum atendimento concluído.</p>";
         }
         
         async function carregarSelectsGerente() {
@@ -571,7 +571,7 @@
                     temPendentes = true;
                     div.innerHTML += `
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b p-2 dark:border-gray-700">
-                            <span class="dark:text-gray-200">${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
+                            <span class_="" "dark:text-gray-200">${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
                             <div class="flex-shrink-0 mt-2 md:mt-0">
                                 <button onclick="mudarStatus('${id}', 'concluido')" class="text-green-600 text-xs font-bold mr-2 transition-transform transform active:scale-95">Concluir</button>
                                 <button onclick="mudarStatus('${id}', 'cancelado')" class="text-red-600 text-xs font-bold transition-transform transform active:scale-95">Cancelar</button>
