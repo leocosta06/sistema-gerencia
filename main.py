@@ -122,6 +122,7 @@ def api_get_contas(tipo_conta):
     try:
         response = requests.get(get_db_url('contas'))
         contas = response.json() or {}
+        # CORREÇÃO: Remove o 's' final do tipo (ex: 'clientes' -> 'cliente')
         filtro_tipo = tipo_conta.rstrip('s')
         contas_filtradas = {uid: conta for uid, conta in contas.items() 
                            if conta.get('tipo_conta') == filtro_tipo}
