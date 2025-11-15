@@ -162,7 +162,19 @@
                         <div class="space-y-4">
                             <select id="agend-servico" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
                             <select id="agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
-                            <input type="datetime-local" id="agend-data" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
+                            
+                            <!-- !! CORREÇÃO: Campos de Data e Hora SEPARADOS !! -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data</label>
+                                    <input type="date" id="agend-data" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hora</label>
+                                    <input type="time" id="agend-hora" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
+                                </div>
+                            </div>
+                            
                             <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 active:bg-blue-800 transition-all transform active:scale-95">Confirmar</g-button>
                         </div>
                     </div>
@@ -400,12 +412,12 @@
                 }
             }
             if (divPendentes.innerHTML === '') divPendentes.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum horário pendente.</p>";
-            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class'text-gray-500 dark:text-gray-400'>Nenhum atendimento concluído.</p>";
+            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum atendimento concluído.</p>";
         }
         
         async function carregarSelectsGerente() {
             // Carrega <select> para comissões de funcionários
-            const resFunc = await fetch('/api/contas/funcionario');
+            const resFunc = await fetch('/api/contas/funcionarios');
             const funcs = await resFunc.json();
             const selFunc = document.getElementById('select-func-comissao');
             selFunc.innerHTML = '<option value="">Selecione um funcionário</option>';
@@ -500,7 +512,7 @@
                     div.innerHTML += `
                         <div class="flex justify-between items-center border-b p-2 dark:border-gray-700">
                             <span class="dark:text-gray-200">${servs[id].nome} (R$ ${servs[id].valor}) - ${servs[id].comissao_percentual}%</span>
-                            <button onclick="removerServico('${id}')" class="text-red-500 hover:text-red-700">
+                            <button onclick="removerServico('${id}')" class="text-red-500 hover:text-red-700 transition-transform transform active:scale-90">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
@@ -524,9 +536,15 @@
         async function marcarAgendamento() {
             const servicoId = document.getElementById('agend-servico').value;
             const funcionarioId = document.getElementById('agend-funcionario').value;
-            const dataHora = document.getElementById('agend-data').value;
             
-            if (!servicoId || !funcionarioId || !dataHora) return mostrarToast("Preencha todos os campos.", "erro");
+            // !! CORREÇÃO: Pega os valores dos campos separados
+            const data = document.getElementById('agend-data').value; // Pega 'YYYY-MM-DD'
+            const hora = document.getElementById('agend-hora').value; // Pega 'HH:MM'
+            
+            if (!servicoId || !funcionarioId || !data || !hora) return mostrarToast("Preencha todos os campos.", "erro");
+
+            // !! CORREÇÃO: Junta a data e a hora com um ESPAÇO
+            const dataHora = `${data} ${hora}`; // Formato "YYYY-MM-DD HH:MM"
 
             // Pega os nomes para salvar
             const servicos = await (await fetch('/api/servicos')).json();
@@ -540,7 +558,7 @@
                 id_servico: servicoId,
                 nome_servico: servicos[servicoId].nome,
                 valor_servico: servicos[servicoId].valor,
-                data_agendamento: dataHora.replace('T', ' ') // Formata AAAA-MM-DD HH:MM
+                data_agendamento: dataHora // Envia o formato "YYYY-MM-DD HH:MM"
             };
 
             const res = await fetch('/api/agendamentos', {
@@ -548,13 +566,13 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(dadosAgendamento)
             });
-            const data = await res.json();
+            const dataRes = await res.json();
             
-            if(data.success) {
-                mostrarToast(data.message);
+            if(dataRes.success) {
+                mostrarToast(dataRes.message);
                 carregarAgendaCliente();
             } else {
-                mostrarToast(data.message, "erro");
+                mostrarToast(dataRes.message, "erro");
             }
         }
         
@@ -571,7 +589,7 @@
                     temPendentes = true;
                     div.innerHTML += `
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b p-2 dark:border-gray-700">
-                            <span class_="" "dark:text-gray-200">${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
+                            <span class="dark:text-gray-200">${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
                             <div class="flex-shrink-0 mt-2 md:mt-0">
                                 <button onclick="mudarStatus('${id}', 'concluido')" class="text-green-600 text-xs font-bold mr-2 transition-transform transform active:scale-95">Concluir</button>
                                 <button onclick="mudarStatus('${id}', 'cancelado')" class="text-red-600 text-xs font-bold transition-transform transform active:scale-95">Cancelar</button>
