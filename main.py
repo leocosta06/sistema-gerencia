@@ -10,7 +10,6 @@ app = Flask(__name__, template_folder='templates')
 
 # --- CONFIGURAÇÃO ---
 # !! COLE A SUA URL DO FIREBASE AQUI !!
-# (A que termina em .firebaseio.com)
 FIREBASE_URL = "https://sistema-salao-59ac8-default-rtdb.firebaseio.com"
 
 # --- FUNÇÕES AUXILIARES DO BACKEND ---
@@ -187,6 +186,6 @@ def api_relatorio_funcionario(id_func):
     
 # --- Inicia o servidor ---
 if __name__ == '__main__':
-    # 'host' e 'port' são necessários para o Replit
+    # 'host' e 'port' são necessários para o Replit/Render
     port = int(os.environ.get('PORT', 8080))
     app.run(host='0.0.0.0', port=port)
