@@ -3,7 +3,7 @@ import requests
 import hashlib
 from datetime import datetime
 import os
-import re # <-- !! A CORREÇÃO ESTÁ AQUI !!
+import re # Importa a biblioteca de RegEx
 
 # Configura a aplicação Flask
 app = Flask(__name__, template_folder='templates')
@@ -122,7 +122,6 @@ def api_get_contas(tipo_conta):
     try:
         response = requests.get(get_db_url('contas'))
         contas = response.json() or {}
-        # CORREÇÃO: Remove o 's' final do tipo (ex: 'clientes' -> 'cliente')
         filtro_tipo = tipo_conta.rstrip('s')
         contas_filtradas = {uid: conta for uid, conta in contas.items() 
                            if conta.get('tipo_conta') == filtro_tipo}
@@ -139,10 +138,20 @@ def api_agendamentos():
     
     elif request.method == 'POST':
         data = request.json
-        data_hora_str = data.get('data_agendamento')
+        
+        # !! A CORREÇÃO ESTÁ AQUI !!
+        data_val = data.get('data') # Ex: "2025-11-20"
+        hora_val = data.get('hora') # Ex: "14:30"
+        
+        if not data_val or not hora_val:
+            return jsonify({"success": False, "message": "Data ou hora em falta."})
+
+        # O Backend junta a data e a hora
+        data_hora_str = f"{data_val} {hora_val}" # Formato: "YYYY-MM-DD HH:MM"
         
         try:
-            data_obj = datetime.strptime(data_hora_str, "%Y-%m-%dT%H:%M")
+            data_obj = datetime.strptime(data_hora_str, "%Y-%m-%d %H:%M")
+            
             if data_obj < datetime.now():
                 return jsonify({"success": False, "message": "Não pode agendar no passado."})
             if data_obj.weekday() == 6: # 6 é Domingo
@@ -152,7 +161,7 @@ def api_agendamentos():
 
             agendamentos_existentes = requests.get(get_db_url('agendamentos')).json() or {}
             for ag in agendamentos_existentes.values():
-                if (ag.get('data_agendamento') == data_hora_str.replace('T', ' ') and 
+                if (ag.get('data_agendamento') == data_hora_str and 
                     ag.get('id_funcionario') == data.get('id_funcionario') and 
                     ag.get('status') == 'agendado'):
                     return jsonify({"success": False, "message": "Erro: Este profissional já está ocupado nesse horário."})
@@ -163,7 +172,12 @@ def api_agendamentos():
             return jsonify({"success": False, "message": f"Erro de validação: {e}"})
             
         data['status'] = 'agendado'
-        data['data_agendamento'] = data_hora_str.replace('T', ' ')
+        # Salva a string completa que o backend criou
+        data['data_agendamento'] = data_hora_str 
+        # Remove as chaves separadas
+        data.pop('data', None)
+        data.pop('hora', None)
+        
         requests.post(get_db_url('agendamentos'), json=data)
         return jsonify({"success": True, "message": "Agendado com sucesso!"})
 
