@@ -7,57 +7,91 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; }
+        /* Adiciona suporte básico de fonte */
+        body { font-family: 'Segoe UI', sans-serif; }
         .hidden { display: none; }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        
+        /* Estilos das Abas (Modo Claro) */
+        .tab-button {
+            padding: 0.75rem 1rem; cursor: pointer; font-weight: 500;
+            color: #6b7280; /* text-gray-500 */
+            border-bottom: 2px solid transparent;
+        }
+        .tab-button.active {
+            color: #2563eb; /* text-blue-600 */
+            border-bottom-color: #2563eb; /* border-blue-600 */
+        }
+        /* Estilos das Abas (Modo Escuro) */
+        .dark .tab-button {
+             color: #9ca3af; /* dark:text-gray-400 */
+        }
+        .dark .tab-button.active {
+            color: #3b82f6; /* dark:text-blue-500 */
+            border-bottom-color: #3b82f6; /* dark:border-blue-500 */
+        }
+        
+        /* Aplica o tema escuro se o sistema operativo o pedir */
+        /* Esta é a linha mágica do Tailwind que ativa o dark mode */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                color-scheme: dark;
+            }
+        }
     </style>
 </head>
-<body class="bg-gray-50 text-gray-800">
+<!-- 
+  !! MUDANÇA IMPORTANTE !!
+  Adicionamos classes dark: para o fundo e cor do texto.
+  O Tailwind irá ativá-las automaticamente se o seu sistema estiver em modo escuro.
+-->
+<body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
 
     <!-- Notificação Toast -->
-    <div id="toast" class="hidden fixed top-5 right-5 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+    <div id="toast" class="hidden fixed top-5 right-5 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 dark:bg-blue-500 dark:text-white">
         <span id="toast-msg"></span>
     </div>
 
     <!-- TELA DE LOGIN -->
     <div id="app-login" class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md fade-in border border-gray-100">
-            <h2 class="text-3xl font-bold text-center text-gray-800 mb-2">Bem-vindo</h2>
-            <p class="text-center text-gray-500 mb-8">Sistema de Gestão de Salão</p>
+        <!-- !! MUDANÇA: Cores do modo escuro adicionadas -->
+        <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md fade-in border border-gray-100 dark:border-gray-700">
+            <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">Bem-vindo</h2>
+            <p class="text-center text-gray-500 dark:text-gray-400 mb-8">Sistema de Gestão de Salão</p>
             
             <div id="form-login" class="space-y-5">
-                <input type="email" id="login-email" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="seu@email.com">
-                <input type="password" id="login-senha" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg" placeholder="••••••••">
+                <input type="email" id="login-email" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="seu@email.com">
+                <input type="password" id="login-senha" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="••••••••">
                 <button onclick="fazerLogin()" class="w-full py-3 px-4 rounded-lg text-white font-bold bg-blue-600 hover:bg-blue-700">Entrar</button>
-                <p class="mt-4 text-center text-sm text-gray-600 cursor-pointer" onclick="toggleForms()">Criar conta nova</p>
+                <button onclick="toggleForms()" class="w-full py-3 px-4 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Criar conta nova</button>
             </div>
 
             <div id="form-cadastro" class="hidden space-y-4">
-                <input type="text" id="cad-nome" placeholder="Nome Completo" class="block w-full px-4 py-3 border rounded-lg">
-                <input type="email" id="cad-email" placeholder="E-mail" class="block w-full px-4 py-3 border rounded-lg">
-                <input type="password" id="cad-senha" placeholder="Senha" class="block w-full px-4 py-3 border rounded-lg">
-                <input type="text" id="cad-telefone" placeholder="Telefone (opcional)" class="block w-full px-4 py-3 border rounded-lg">
-                <select id="cad-tipo" class="block w-full px-4 py-3 border rounded-lg bg-white">
+                <input type="text" id="cad-nome" placeholder="Nome Completo" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <input type="email" id="cad-email" placeholder="E-mail" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <input type="password" id="cad-senha" placeholder="Senha (Mín. 8, 1 Nº, 1 Maiúscula)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <input type="text" id="cad-telefone" placeholder="Telefone (opcional)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <select id="cad-tipo" class="block w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                     <option value="cliente">Sou Cliente</option>
                     <option value="funcionario">Sou Funcionário</option>
                     <option value="gerente">Sou Gerente</option>
                 </select>
                 <button onclick="fazerCadastro()" class="w-full py-3 rounded-lg text-white font-bold bg-green-600 hover:bg-green-700">Registar</button>
-                <button onclick="toggleForms()" class="w-full py-3 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200">Voltar</button>
+                <button onclick="toggleForms()" class="w-full py-3 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Voltar</button>
             </div>
         </div>
     </div>
 
     <!-- DASHBOARD (PAINEL PRINCIPAL) -->
     <div id="app-dashboard" class="hidden min-h-screen">
-        <nav class="bg-white shadow-md sticky top-0 z-40">
+        <nav class="bg-white dark:bg-gray-800 shadow-md sticky top-0 z-40 dark:border-b dark:border-gray-700">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between h-16">
                     <span class="font-bold text-xl text-blue-600 flex items-center">SalãoApp</span>
                     <div class="flex items-center space-x-4">
-                        <span id="user-welcome" class="text-gray-800 text-sm font-bold"></span>
-                        <button onclick="fazerLogout()" class="text-red-600 hover:text-red-800 text-sm font-bold">Sair</button>
+                        <span id="user-welcome" class="text-gray-800 dark:text-gray-100 text-sm font-bold"></span>
+                        <button onclick="fazerLogout()" class="text-red-600 hover:text-red-800 dark:text-red-500 dark:hover:text-red-400 text-sm font-bold">Sair</button>
                     </div>
                 </div>
             </div>
@@ -66,50 +100,109 @@
         <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
             <!-- ÁREA DO GERENTE -->
             <div id="area-gerente" class="hidden space-y-6">
-                <h1 class="text-2xl font-bold text-gray-900">Painel Administrativo</h1>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Painel Administrativo</h1>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="font-bold">Faturamento</h3><p id="rel-faturamento">R$ 0.00</p></div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="font-bold">Comissões</h3><p id="rel-comissoes">R$ 0.00</p></div>
-                    <div class="bg-white p-6 rounded-xl shadow-sm border"><h3 class="font-bold">Lucro</h3><p id="rel-lucro">R$ 0.00</p></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Faturamento</h3><p id="rel-faturamento" class="text-2xl font-bold text-green-600">R$ 0.00</p></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Comissões</h3><p id="rel-comissoes" class="text-2xl font-bold text-orange-500">R$ 0.00</p></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Lucro</h3><p id="rel-lucro" class="text-2xl font-bold text-blue-600">R$ 0.00</p></div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 class="text-lg font-bold mb-4">Gerir Agenda</h3>
+                
+                <div class="border-b border-gray-200 dark:border-gray-700">
+                    <nav class="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
+                        <button class="tab-button active" onclick="abrirAba(event, 'agenda')">Agenda</button>
+                        <button class="tab-button" onclick="abrirAba(event, 'servicos')">Serviços</button>
+                        <button class="tab-button" onclick="abrirAba(event, 'clientes')">Clientes</button>
+                        <button class="tab-button" onclick="abrirAba(event, 'funcionarios')">Funcionários</button>
+                        <button class="tab-button" onclick="abrirAba(event, 'gerentes')">Gerentes</button>
+                    </nav>
+                </div>
+
+                <div id="agenda" class="tab-content bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 dark:text-white">Gerir Agenda (Pendentes)</h3>
                     <div id="lista-agendamentos-gerente" class="space-y-2"></div>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 class="text-lg font-bold mb-4">Adicionar Serviço</h3>
-                    <input id="serv-nome" placeholder="Nome (ex: Corte)" class="w-full border rounded-lg p-2 mb-2">
-                    <input id="serv-valor" type="number" placeholder="Valor (R$)" class="w-full border rounded-lg p-2 mb-2">
-                    <input id="serv-comissao" type="number" placeholder="Comissão (%)" class="w-full border rounded-lg p-2 mb-2" value="20">
-                    <button onclick="adicionarServico()" class="w-full bg-blue-600 text-white p-2 rounded-lg">Salvar Serviço</button>
+                
+                <div id="servicos" class="tab-content hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 dark:text-white">Gerir Serviços</h3>
+                    <div class="mb-6 p-4 border dark:border-gray-700 rounded-lg">
+                        <h4 class="font-semibold mb-2 dark:text-white">Adicionar Novo Serviço</h4>
+                        <input id="serv-nome" placeholder="Nome (ex: Corte)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input id="serv-valor" type="number" placeholder="Valor (R$)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                        <input id="serv-comissao" type="number" placeholder="Comissão (%)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="20">
+                        <button onclick="adicionarServico()" class="w-full bg-blue-600 text-white p-2 rounded-lg">Salvar Serviço</button>
+                    </div>
+                    <h4 class="font-semibold mb-2 dark:text-white">Serviços Existentes</h4>
+                    <div id="lista-servicos-gerente" class="space-y-2"></div>
+                </div>
+
+                <div id="clientes" class="tab-content hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 dark:text-white">Analisar Frequência de Clientes</h3>
+                    <select id="select-cliente-freq" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-4"></select>
+                    <div id="info-frequencia" class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"></div>
+                </div>
+                
+                <div id="funcionarios" class="tab-content hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 dark:text-white">Comissões por Funcionário</h3>
+                    <select id="select-func-comissao" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white mb-4"></select>
+                    <div id="info-comissao" class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"></div>
+                </div>
+                
+                <div id="gerentes" class="tab-content hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 dark:text-white">Gerir Staff</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">Para registar novos Gerentes ou Funcionários, use a página de "Criar conta nova" (na tela de login) e selecione o tipo correto.</p>
                 </div>
             </div>
 
             <!-- ÁREA DO CLIENTE -->
             <div id="area-cliente" class="hidden space-y-6">
-                <h1 class="text-2xl font-bold text-gray-900">Meu Espaço</h1>
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 class="text-lg font-bold mb-4">Marcar Horário</h3>
-                    <div class="space-y-4">
-                        <select id="agend-servico" class="w-full border rounded-lg p-2.5 bg-white"></select>
-                        <select id="agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white"></select>
-                        <input type="datetime-local" id="agend-data" class="w-full border rounded-lg p-2">
-                        <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold">Confirmar</g-button>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Meu Espaço</h1>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 dark:text-white">Marcar Horário</h3>
+                        <div class="space-y-4">
+                            <select id="agend-servico" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
+                            <select id="agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
+                            <input type="datetime-local" id="agend-data" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
+                            <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold">Confirmar</g-button>
+                        </div>
                     </div>
-                </div>
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 class="text-lg font-bold mb-4">Meus Agendamentos</h3>
-                    <div id="meus-agendamentos-lista" class="space-y-3"></div>
+                    <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                        <h3 class="text-lg font-bold mb-4 dark:text-white">Meus Agendamentos</h3>
+                        <div id="meus-agendamentos-lista" class="space-y-3"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- ÁREA DO FUNCIONÁRIO -->
             <div id="area-funcionario" class="hidden space-y-6">
-                <h1 class="text-2xl font-bold text-gray-900">Portal do Funcionário</h1>
-                <div class="bg-white p-6 rounded-xl shadow-sm border">
-                    <h3 class="font-bold">Minha Comissão (de atendimentos concluídos)</h3>
-                    <p id="func-comissao" class="text-2xl font-bold text-green-600">R$ 0.00</p>
-                    <p class="text-sm text-gray-500" id="func-atendimentos">Total de atendimentos: 0</p>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Portal do Funcionário</h1>
+                
+                <div class="border-b border-gray-200 dark:border-gray-700">
+                    <nav class="-mb-px flex space-x-6" aria-label="Tabs">
+                        <button class="tab-button-func active" onclick="abrirAbaFunc(event, 'func-agenda')">Minha Agenda</button>
+                        <button class="tab-button-func" onclick="abrirAbaFunc(event, 'func-ganhos')">Meus Ganhos</button>
+                    </nav>
+                </div>
+
+                <div id="func-agenda" class="tab-content-func bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                    <h3 class="text-lg font-bold mb-4 dark:text-white">Meus Próximos Clientes (Agendados)</h3>
+                    <div id="lista-agendamentos-func-pendentes" class="space-y-2"></div>
+                </div>
+                
+                <div id="func-ganhos" class="tab-content-func hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
+                    <h3 class="font-bold mb-2 dark:text-white">Meu Desempenho</h3>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Comissão a Receber (do mês)</p>
+                            <p id="func-comissao" class="text-2xl font-bold text-green-600">R$ 0.00</p>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Total de Atendimentos (mês)</p>
+                            <p id="func-atendimentos" class="text-2xl font-bold text-blue-600">0</p>
+                        </div>
+                    </div>
+                    <h3 class="text-lg font-bold mt-6 mb-4 dark:text-white">Histórico de Atendimentos Concluídos</h3>
+                    <div id="lista-agendamentos-func-concluidos" class="space-y-2"></div>
                 </div>
             </div>
         </main>
@@ -139,9 +232,30 @@
 
         function fazerLogout() {
             currentUser = null;
-            localStorage.removeItem('salaoUser');
-            location.reload();
+            localStorage.removeItem('salaoUser'); // Apaga a sessão salva
+            location.reload(); // Recarrega a página para a tela de login
         }
+        
+        function abrirAba(evt, nomeAba) {
+            document.querySelectorAll('#area-gerente .tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('#area-gerente .tab-button').forEach(btn => btn.classList.remove('active', 'border-blue-600', 'text-blue-600'));
+            document.getElementById(nomeAba).classList.remove('hidden');
+            evt.currentTarget.classList.add('active', 'border-blue-600', 'text-blue-600');
+        }
+        
+        function abrirAbaFunc(evt, nomeAba) {
+            document.querySelectorAll('#area-funcionario .tab-content-func').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('#area-funcionario .tab-button-func').forEach(btn => btn.classList.remove('active', 'border-blue-600', 'text-blue-600'));
+            document.getElementById(nomeAba).classList.remove('hidden');
+            evt.currentTarget.classList.add('active', 'border-blue-600', 'text-blue-600');
+        }
+
+        // Ativa a primeira aba por defeito ao carregar
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelector('#area-gerente .tab-button')?.click();
+            document.querySelector('#area-funcionario .tab-button-func')?.click();
+        });
+
 
         function showDashboard() {
             document.getElementById('app-login').classList.add('hidden');
@@ -167,9 +281,6 @@
         }
 
         // --- Funções de API (Falam com o Python) ---
-
-        // O 'fetch' é como o 'requests' do Python, mas para JavaScript.
-        // Ele chama as URLs que criámos no main.py
         
         async function fazerLogin() {
             const email = document.getElementById('login-email').value;
@@ -191,6 +302,17 @@
                 mostrarToast(data.message, "erro");
             }
         }
+        
+        // !! NOVA FUNÇÃO DE LOGIN VISITANTE !!
+        function fazerLoginVisitante() {
+            // Preenche os campos com os dados de demonstração
+            // IMPORTANTE: Crie esta conta manualmente usando o formulário de registo
+            document.getElementById('login-email').value = "demo@gerente.com";
+            document.getElementById('login-senha').value = "Demo123456";
+            
+            // Clica no botão de login
+            fazerLogin();
+        }
 
         async function fazerCadastro() {
             const nome = document.getElementById('cad-nome').value;
@@ -199,14 +321,33 @@
             const tipo = document.getElementById('cad-tipo').value;
             const telefone = document.getElementById('cad-telefone').value;
 
+            // Validação de Frontend (feedback imediato)
+            if (!nome || !email || !senha) {
+                return mostrarToast("Por favor, preencha nome, e-mail e senha.", "erro");
+            }
+            if (senha.length < 8) {
+                return mostrarToast("A senha deve ter pelo menos 8 caracteres.", "erro");
+            }
+            if (!/\d/.test(senha)) {
+                return mostrarToast("A senha deve conter pelo menos um número.", "erro");
+            }
+            if (!/[A-Z]/.test(senha)) {
+                return mostrarToast("A senha deve conter pelo menos uma letra maiúscula.", "erro");
+            }
+
             const res = await fetch('/api/register', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ nome, email, senha, tipo_conta: tipo, telefone })
             });
-            
-            mostrarToast("Conta criada! Por favor, faça login.");
-            toggleForms();
+            const data = await res.json();
+
+            if (data.success) {
+                mostrarToast("Conta criada! Por favor, faça login.");
+                toggleForms();
+            } else {
+                mostrarToast(data.message, "erro");
+            }
         }
 
         // --- Funções de Carregamento de Dados ---
@@ -220,6 +361,8 @@
             document.getElementById('rel-lucro').innerText = `R$ ${rel.lucro_bruto.toFixed(2)}`;
             
             carregarAgendaGerente();
+            carregarSelectsGerente(); // Carrega os dropdowns
+            carregarListaServicosGerente();
         }
 
         async function carregarDadosCliente() {
@@ -228,10 +371,91 @@
         }
         
         async function carregarDadosFuncionario() {
+            // Carrega Relatório de Ganhos
             const res = await fetch(`/api/relatorio/funcionario/${currentUser.id}`);
             const rel = await res.json();
             document.getElementById('func-comissao').innerText = `R$ ${rel.comissao_total.toFixed(2)}`;
             document.getElementById('func-atendimentos').innerText = `Total de atendimentos: ${rel.total_atendimentos}`;
+            
+            // Carrega Agendas (Pendentes e Concluídos)
+            const resAg = await fetch('/api/agendamentos');
+            const agendamentos = await resAg.json();
+            const divPendentes = document.getElementById('lista-agendamentos-func-pendentes');
+            const divConcluidos = document.getElementById('lista-agendamentos-func-concluidos');
+            divPendentes.innerHTML = '';
+            divConcluidos.innerHTML = '';
+            
+            if (agendamentos) {
+                for(let id in agendamentos) {
+                    const ag = agendamentos[id];
+                    if (ag.id_funcionario === currentUser.id) {
+                        const itemHtml = `
+                            <div class="border-b p-2 dark:border-gray-700">
+                                <p class="font-bold dark:text-white">${ag.nome_servico} - ${ag.nome_cliente}</p>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">${formatarData(ag.data_agendamento)}</p>
+                            </div>`;
+                        
+                        if (ag.status === 'agendado') {
+                            divPendentes.innerHTML += itemHtml;
+                        } else if (ag.status === 'concluido') {
+                            divConcluidos.innerHTML += itemHtml;
+                        }
+                    }
+                }
+            }
+            if (divPendentes.innerHTML === '') divPendentes.innerHTML = "<p class='text-gray-500'>Nenhum horário pendente.</p>";
+            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class='text-gray-500'>Nenhum atendimento concluído.</p>";
+        }
+        
+        async function carregarSelectsGerente() {
+            // Carrega <select> para comissões de funcionários
+            const resFunc = await fetch('/api/contas/funcionario');
+            const funcs = await resFunc.json();
+            const selFunc = document.getElementById('select-func-comissao');
+            selFunc.innerHTML = '<option value="">Selecione um funcionário</option>';
+            if (funcs) {
+                 for (let id in funcs) {
+                    selFunc.innerHTML += `<option value="${id}">${funcs[id].nome}</option>`;
+                }
+            }
+            // Adiciona listener para carregar o relatório individual
+            selFunc.onchange = async (e) => {
+                if (!e.target.value) {
+                    document.getElementById('info-comissao').innerHTML = '';
+                    return;
+                }
+                const res = await fetch(`/api/relatorio/funcionario/${e.target.value}`);
+                const rel = await res.json();
+                document.getElementById('info-comissao').innerHTML = `
+                    <p class="text-lg">Atendimentos: <span class="font-bold">${rel.total_atendimentos}</span></p>
+                    <p class="text-lg">Comissão: <span class="font-bold text-green-600">R$ ${rel.comissao_total.toFixed(2)}</span></p>
+                `;
+            };
+
+            // Carrega <select> para frequência de clientes
+            const resCli = await fetch('/api/contas/clientes');
+            const clientes = await resCli.json();
+            const selCli = document.getElementById('select-cliente-freq');
+            selCli.innerHTML = '<option value="">Selecione um cliente</option>';
+            if (clientes) {
+                 for (let id in clientes) {
+                    selCli.innerHTML += `<option value="${id}">${clientes[id].nome}</option>`;
+                }
+            }
+            // Adiciona listener
+            selCli.onchange = async (e) => {
+                if (!e.target.value) {
+                    document.getElementById('info-frequencia').innerHTML = '';
+                    return;
+                }
+                const res = await fetch(`/api/analise/cliente/${e.target.value}`);
+                const ana = await res.json();
+                document.getElementById('info-frequencia').innerHTML = `
+                    <p class="text-lg">Total de Visitas: <span class="font-bold">${ana.total_visitas}</span></p>
+                    <p class="text-sm text-gray-500">Status: ${ana.frequencia_msg}</p>
+                    <p class="text-sm text-gray-500">Cliente desde: ${ana.cliente_desde}</p>
+                `;
+            };
         }
 
         async function carregarListasAgendamento() {
@@ -247,7 +471,7 @@
             }
             
             // Carregar Funcionários
-            const resFunc = await fetch('/api/funcionarios');
+            const resFunc = await fetch('/api/contas/funcionarios');
             const funcs = await resFunc.json();
             const selFunc = document.getElementById('agend-funcionario');
             selFunc.innerHTML = '<option value="">Escolha o profissional</option>';
@@ -263,12 +487,44 @@
             const valor = parseFloat(document.getElementById('serv-valor').value);
             const comissao = parseInt(document.getElementById('serv-comissao').value);
 
-            await fetch('/api/servicos', {
+            await fetch('/api/servicos/add', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ nome, valor, comissao_percentual: comissao })
             });
             mostrarToast("Serviço adicionado!");
+            carregarListaServicosGerente(); // Atualiza a lista
+        }
+        
+        async function carregarListaServicosGerente() {
+            const res = await fetch('/api/servicos');
+            const servs = await res.json();
+            const div = document.getElementById('lista-servicos-gerente');
+            div.innerHTML = '';
+            if (servs) {
+                for (let id in servs) {
+                    div.innerHTML += `
+                        <div class="flex justify-between items-center border-b p-2 dark:border-gray-700">
+                            <span class="dark:text-gray-200">${servs[id].nome} (R$ ${servs[id].valor}) - ${servs[id].comissao_percentual}%</span>
+                            <button onclick="removerServico('${id}')" class="text-red-500 hover:text-red-700">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `;
+                }
+            }
+            lucide.createIcons(); // Recarrega os ícones de lixo
+        }
+
+        async function removerServico(id) {
+            if (!confirm("Tem certeza que quer remover este serviço?")) return;
+            await fetch('/api/servicos/delete', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ id })
+            });
+            mostrarToast("Serviço removido!");
+            carregarListaServicosGerente();
         }
 
         async function marcarAgendamento() {
@@ -280,7 +536,7 @@
 
             // Pega os nomes para salvar
             const servicos = await (await fetch('/api/servicos')).json();
-            const funcionarios = await (await fetch('/api/funcionarios')).json();
+            const funcionarios = await (await fetch('/api/contas/funcionarios')).json();
             
             const dadosAgendamento = {
                 id_cliente: currentUser.id,
@@ -320,8 +576,8 @@
                 if (ag.status === 'agendado') {
                     temPendentes = true;
                     div.innerHTML += `
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b p-2">
-                            <span>${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b p-2 dark:border-gray-700">
+                            <span class="dark:text-gray-200">${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
                             <div class="flex-shrink-0 mt-2 md:mt-0">
                                 <button onclick="mudarStatus('${id}', 'concluido')" class="text-green-600 text-xs font-bold mr-2">Concluir</button>
                                 <button onclick="mudarStatus('${id}', 'cancelado')" class="text-red-600 text-xs font-bold">Cancelar</button>
@@ -343,16 +599,17 @@
                 if (ag.id_cliente === currentUser.id) {
                     temMeus = true;
                     div.innerHTML += `
-                        <div class="border-b p-2">
-                            <p class="font-bold">${ag.nome_servico}</p>
-                            <p class="text-sm">${ag.data_agendamento} - Status: ${ag.status}</p>
+                        <div class="border-b p-2 dark:border-gray-700">
+                            <p class="font-bold dark:text-white">${ag.nome_servico}</p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">${ag.data_agendamento} - Status: ${ag.status}</p>
                         </div>`;
                 }
             }
-            if (!temMeus) div.innerHTML = "<p class='text-gray-500'>Sem agendamentos.</p>";
+            if (!temMeus) div.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Sem agendamentos.</p>";
         }
 
         async function mudarStatus(id, status) {
+            if (!confirm(`Tem certeza que deseja marcar como ${status}?`)) return;
             await fetch('/api/agendamentos/update', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -362,7 +619,7 @@
             carregarDadosGerente(); // Recarrega os dados
         }
         
-        // Verifica se o utilizador já está logado
+        // Verifica se o utilizador já está logado ao carregar a página
         window.onload = () => {
             const user = localStorage.getItem('salaoUser');
             if (user) {
