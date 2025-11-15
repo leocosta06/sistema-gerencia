@@ -3,7 +3,7 @@ import requests
 import hashlib
 from datetime import datetime
 import os
-import re # Importa a biblioteca de RegEx
+import re # <-- !! A CORREÇÃO ESTÁ AQUI !!
 
 # Configura a aplicação Flask
 app = Flask(__name__, template_folder='templates')
@@ -122,8 +122,10 @@ def api_get_contas(tipo_conta):
     try:
         response = requests.get(get_db_url('contas'))
         contas = response.json() or {}
+        # CORREÇÃO: Remove o 's' final do tipo (ex: 'clientes' -> 'cliente')
+        filtro_tipo = tipo_conta.rstrip('s')
         contas_filtradas = {uid: conta for uid, conta in contas.items() 
-                           if conta.get('tipo_conta') == tipo_conta}
+                           if conta.get('tipo_conta') == filtro_tipo}
         return jsonify(contas_filtradas)
     except Exception as e:
         return jsonify({"error": str(e)})
