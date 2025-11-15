@@ -7,12 +7,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        /* Adiciona suporte básico de fonte */
-        body { font-family: 'Segoe UI', sans-serif; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f3f4f6; }
         .hidden { display: none; }
         .fade-in { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
         /* Estilos das Abas (Modo Claro) */
         .tab-button {
             padding: 0.75rem 1rem; cursor: pointer; font-weight: 500;
@@ -33,7 +31,6 @@
         }
         
         /* Aplica o tema escuro se o sistema operativo o pedir */
-        /* Esta é a linha mágica do Tailwind que ativa o dark mode */
         @media (prefers-color-scheme: dark) {
             :root {
                 color-scheme: dark;
@@ -41,21 +38,16 @@
         }
     </style>
 </head>
-<!-- 
-  !! MUDANÇA IMPORTANTE !!
-  Adicionamos classes dark: para o fundo e cor do texto.
-  O Tailwind irá ativá-las automaticamente se o seu sistema estiver em modo escuro.
--->
+<!-- Adicionadas classes dark: para o modo escuro automático -->
 <body class="bg-gray-50 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
 
     <!-- Notificação Toast -->
-    <div id="toast" class="hidden fixed top-5 right-5 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 dark:bg-blue-500 dark:text-white">
+    <div id="toast" class="hidden fixed top-5 right-5 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-lg z-50">
         <span id="toast-msg"></span>
     </div>
 
     <!-- TELA DE LOGIN -->
     <div id="app-login" class="flex items-center justify-center min-h-screen p-4">
-        <!-- !! MUDANÇA: Cores do modo escuro adicionadas -->
         <div class="bg-white dark:bg-gray-800 p-8 rounded-2xl shadow-xl w-full max-w-md fade-in border border-gray-100 dark:border-gray-700">
             <h2 class="text-3xl font-bold text-center text-gray-800 dark:text-white mb-2">Bem-vindo</h2>
             <p class="text-center text-gray-500 dark:text-gray-400 mb-8">Sistema de Gestão de Salão</p>
@@ -63,8 +55,16 @@
             <div id="form-login" class="space-y-5">
                 <input type="email" id="login-email" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="seu@email.com">
                 <input type="password" id="login-senha" class="pl-4 block w-full px-4 py-3 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="••••••••">
-                <button onclick="fazerLogin()" class="w-full py-3 px-4 rounded-lg text-white font-bold bg-blue-600 hover:bg-blue-700">Entrar</button>
-                <button onclick="toggleForms()" class="w-full py-3 px-4 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Criar conta nova</button>
+                
+                <!-- !! MUDANÇA: Adicionada animação de clique e cor mais escura !! -->
+                <button onclick="fazerLogin()" class="w-full py-3 px-4 rounded-lg text-white font-bold bg-blue-600 hover:bg-blue-700 active:bg-blue-800 transition-all transform active:scale-95">
+                    Entrar
+                </button>
+                <button onclick="fazerLoginVisitante()" class="w-full py-3 px-4 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 active:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:active:bg-gray-500 transition-all transform active:scale-95">
+                    Entrar como Visitante (Demo)
+                </button>
+                
+                <p class="mt-4 text-center text-sm text-gray-600 dark:text-gray-400 cursor-pointer" onclick="toggleForms()">Criar conta nova</p>
             </div>
 
             <div id="form-cadastro" class="hidden space-y-4">
@@ -77,8 +77,8 @@
                     <option value="funcionario">Sou Funcionário</option>
                     <option value="gerente">Sou Gerente</option>
                 </select>
-                <button onclick="fazerCadastro()" class="w-full py-3 rounded-lg text-white font-bold bg-green-600 hover:bg-green-700">Registar</button>
-                <button onclick="toggleForms()" class="w-full py-3 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600">Voltar</button>
+                <button onclick="fazerCadastro()" class="w-full py-3 rounded-lg text-white font-bold bg-green-600 hover:bg-green-700 active:bg-green-800 transition-all transform active:scale-95">Registar</button>
+                <button onclick="toggleForms()" class="w-full py-3 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 active:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 dark:active:bg-gray-500 transition-all transform active:scale-95">Voltar</button>
             </div>
         </div>
     </div>
@@ -129,7 +129,7 @@
                         <input id="serv-nome" placeholder="Nome (ex: Corte)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <input id="serv-valor" type="number" placeholder="Valor (R$)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                         <input id="serv-comissao" type="number" placeholder="Comissão (%)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" value="20">
-                        <button onclick="adicionarServico()" class="w-full bg-blue-600 text-white p-2 rounded-lg">Salvar Serviço</button>
+                        <button onclick="adicionarServico()" class="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-all transform active:scale-95">Salvar Serviço</button>
                     </div>
                     <h4 class="font-semibold mb-2 dark:text-white">Serviços Existentes</h4>
                     <div id="lista-servicos-gerente" class="space-y-2"></div>
@@ -163,7 +163,7 @@
                             <select id="agend-servico" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
                             <select id="agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
                             <input type="datetime-local" id="agend-data" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
-                            <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold">Confirmar</g-button>
+                            <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 active:bg-blue-800 transition-all transform active:scale-95">Confirmar</g-button>
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
@@ -282,9 +282,9 @@
 
         // --- Funções de API (Falam com o Python) ---
         
-        async function fazerLogin() {
-            const email = document.getElementById('login-email').value;
-            const senha = document.getElementById('login-senha').value;
+        async function fazerLogin(email, senha) {
+            email = email || document.getElementById('login-email').value;
+            senha = senha || document.getElementById('login-senha').value;
             if (!email || !senha) return mostrarToast("Preencha os campos", "erro");
 
             const res = await fetch('/api/login', {
@@ -303,15 +303,11 @@
             }
         }
         
-        // !! NOVA FUNÇÃO DE LOGIN VISITANTE !!
+        // !! FUNÇÃO DE LOGIN VISITANTE !!
         function fazerLoginVisitante() {
-            // Preenche os campos com os dados de demonstração
             // IMPORTANTE: Crie esta conta manualmente usando o formulário de registo
-            document.getElementById('login-email').value = "demo@gerente.com";
-            document.getElementById('login-senha').value = "Demo123456";
-            
-            // Clica no botão de login
-            fazerLogin();
+            // Senha: "Demo123456"
+            fazerLogin("demo@gerente.com", "Demo123456");
         }
 
         async function fazerCadastro() {
@@ -403,8 +399,8 @@
                     }
                 }
             }
-            if (divPendentes.innerHTML === '') divPendentes.innerHTML = "<p class='text-gray-500'>Nenhum horário pendente.</p>";
-            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class='text-gray-500'>Nenhum atendimento concluído.</p>";
+            if (divPendentes.innerHTML === '') divPendentes.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum horário pendente.</p>";
+            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum atendimento concluído.</p>";
         }
         
         async function carregarSelectsGerente() {
@@ -418,7 +414,6 @@
                     selFunc.innerHTML += `<option value="${id}">${funcs[id].nome}</option>`;
                 }
             }
-            // Adiciona listener para carregar o relatório individual
             selFunc.onchange = async (e) => {
                 if (!e.target.value) {
                     document.getElementById('info-comissao').innerHTML = '';
@@ -442,7 +437,6 @@
                     selCli.innerHTML += `<option value="${id}">${clientes[id].nome}</option>`;
                 }
             }
-            // Adiciona listener
             selCli.onchange = async (e) => {
                 if (!e.target.value) {
                     document.getElementById('info-frequencia').innerHTML = '';
@@ -579,13 +573,13 @@
                         <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b p-2 dark:border-gray-700">
                             <span class="dark:text-gray-200">${ag.data_agendamento} - ${ag.nome_cliente} (${ag.nome_servico})</span>
                             <div class="flex-shrink-0 mt-2 md:mt-0">
-                                <button onclick="mudarStatus('${id}', 'concluido')" class="text-green-600 text-xs font-bold mr-2">Concluir</button>
-                                <button onclick="mudarStatus('${id}', 'cancelado')" class="text-red-600 text-xs font-bold">Cancelar</button>
+                                <button onclick="mudarStatus('${id}', 'concluido')" class="text-green-600 text-xs font-bold mr-2 transition-transform transform active:scale-95">Concluir</button>
+                                <button onclick="mudarStatus('${id}', 'cancelado')" class="text-red-600 text-xs font-bold transition-transform transform active:scale-95">Cancelar</button>
                             </div>
                         </div>`;
                 }
             }
-            if (!temPendentes) div.innerHTML = "<p class='text-gray-500'>Nenhum agendamento pendente.</p>";
+            if (!temPendentes) div.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum agendamento pendente.</p>";
         }
         
         async function carregarAgendaCliente() {
