@@ -10,6 +10,7 @@ app = Flask(__name__, template_folder='templates')
 
 # --- CONFIGURAÇÃO ---
 # !! COLE A SUA URL DO FIREBASE AQUI !!
+# (A que termina em .firebaseio.com)
 FIREBASE_URL = "https://sistema-salao-59ac8-default-rtdb.firebaseio.com"
 
 # --- FUNÇÕES AUXILIARES DO BACKEND ---
@@ -19,7 +20,6 @@ def hash_senha(senha):
 
 def get_db_url(endpoint):
     """Gera a URL completa para a tabela (endpoint) no Firebase."""
-    # Garante que a URL não termina com uma barra extra
     base = FIREBASE_URL.rstrip('/')
     if not endpoint.startswith('/'):
         endpoint = '/' + endpoint
@@ -82,11 +82,25 @@ def api_servicos():
         return jsonify(resp.json() or {})
     
     elif request.method == 'POST':
-        data = request.json # {nome, valor, comissao}
+        data = request.json # {nome, valor, comissao_percentual}
         requests.post(get_db_url('servicos'), json=data)
         return jsonify({"success": True, "message": "Serviço adicionado!"})
 
-# --- ROTA 5: API PARA AGENDAMENTOS (GET E POST) ---
+# --- ROTA 5: API PARA FUNCIONÁRIOS (GET) ---
+@app.route('/api/funcionarios', methods=['GET'])
+def api_funcionarios():
+    """Retorna uma lista de todos os funcionários."""
+    try:
+        response = requests.get(get_db_url('contas'))
+        contas = response.json() or {}
+        # Filtra apenas por funcionários (ou gerentes, que também podem atender)
+        funcionarios = {uid: conta for uid, conta in contas.items() 
+                        if conta.get('tipo_conta') in ['funcionario', 'gerente']}
+        return jsonify(funcionarios)
+    except Exception as e:
+        return jsonify({"error": str(e)})
+
+# --- ROTA 6: API PARA AGENDAMENTOS (GET E POST) ---
 @app.route('/api/agendamentos', methods=['GET', 'POST'])
 def api_agendamentos():
     """Função para o Cliente ler ou criar agendamentos."""
@@ -97,10 +111,19 @@ def api_agendamentos():
     elif request.method == 'POST':
         data = request.json
         data['status'] = 'agendado' # Define o status inicial
+        
+        # Validação de data (impedir agendamento no passado)
+        try:
+            data_obj = datetime.strptime(data.get('data_agendamento'), "%Y-%m-%dT%H:%M")
+            if data_obj < datetime.now():
+                return jsonify({"success": False, "message": "Não pode agendar no passado."})
+        except Exception:
+            return jsonify({"success": False, "message": "Formato de data inválido."})
+            
         requests.post(get_db_url('agendamentos'), json=data)
         return jsonify({"success": True, "message": "Agendado com sucesso!"})
 
-# --- ROTA 6: API PARA ATUALIZAR AGENDA ---
+# --- ROTA 7: API PARA ATUALIZAR AGENDA ---
 @app.route('/api/agendamentos/update', methods=['POST'])
 def api_update_agendamento():
     """Função para o Gerente atualizar o status (Concluir/Cancelar)."""
@@ -132,7 +155,7 @@ def api_update_agendamento():
             
     return jsonify({"success": True})
 
-# --- ROTA 7: API PARA RELATÓRIOS (GERENTE) ---
+# --- ROTA 8: API PARA RELATÓRIOS (GERENTE) ---
 @app.route('/api/relatorio/geral')
 def api_relatorio_geral():
     atendimentos = requests.get(get_db_url('atendimentos')).json() or {}
@@ -147,7 +170,7 @@ def api_relatorio_geral():
         "lucro_bruto": total - comissoes
     })
     
-# --- ROTA 8: API PARA RELATÓRIO (FUNCIONÁRIO) ---
+# --- ROTA 9: API PARA RELATÓRIO (FUNCIONÁRIO) ---
 @app.route('/api/relatorio/funcionario/<id_func>')
 def api_relatorio_funcionario(id_func):
     atendimentos = requests.get(get_db_url('atendimentos')).json() or {}
@@ -165,4 +188,5 @@ def api_relatorio_funcionario(id_func):
 # --- Inicia o servidor ---
 if __name__ == '__main__':
     # 'host' e 'port' são necessários para o Replit
-    app.run(host='0.0.0.0', port=8080)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(host='0.0.0.0', port=port)
