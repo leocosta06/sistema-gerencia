@@ -3,6 +3,7 @@ import requests
 import hashlib
 from datetime import datetime
 import os
+import re # Importa a biblioteca de RegEx
 
 # Configura a aplicação Flask
 app = Flask(__name__, template_folder='templates')
@@ -51,7 +52,7 @@ def api_login():
     except Exception as e:
         return jsonify({"success": False, "message": f"Erro no servidor: {e}"})
 
-# --- ROTA 3: API PARA REGISTO (Cria Gerente, Funcionário ou Cliente) ---
+# --- ROTA 3: API PARA REGISTO (COM VALIDAÇÃO) ---
 @app.route('/api/register', methods=['POST'])
 def api_register():
     """Esta é a função que o JavaScript chama para criar uma nova conta."""
@@ -63,12 +64,16 @@ def api_register():
     # Validações de Backend
     if not nome or not email or not senha:
         return jsonify({"success": False, "message": "Todos os campos são obrigatórios."})
+    
     if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
         return jsonify({"success": False, "message": "Formato de e-mail inválido."})
+        
     if len(senha) < 8:
         return jsonify({"success": False, "message": "A senha deve ter pelo menos 8 caracteres."})
+        
     if not re.search(r"\d", senha):
         return jsonify({"success": False, "message": "A senha deve conter pelo menos um número."})
+        
     if not re.search(r"[A-Z]", senha):
         return jsonify({"success": False, "message": "A senha deve conter pelo menos uma letra maiúscula."})
 
@@ -156,7 +161,7 @@ def api_agendamentos():
             return jsonify({"success": False, "message": f"Erro de validação: {e}"})
             
         data['status'] = 'agendado'
-        data['data_agendamento'] = data_hora_str.replace('T', ' ') # Garante formato AAAA-MM-DD HH:MM
+        data['data_agendamento'] = data_hora_str.replace('T', ' ')
         requests.post(get_db_url('agendamentos'), json=data)
         return jsonify({"success": True, "message": "Agendado com sucesso!"})
 
