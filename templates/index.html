@@ -160,18 +160,18 @@
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 dark:text-white">Marcar Horário</h3>
                         <div class="space-y-4">
-                            <select id="agend-servico" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
-                            <select id="agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
+                            <!-- !! CORREÇÃO: IDs únicos para o painel do cliente !! -->
+                            <select id="cli-agend-servico" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
+                            <select id="cli-agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
                             
-                            <!-- !! CORREÇÃO: Campos de Data e Hora SEPARADOS !! -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Data</label>
-                                    <input type="date" id="agend-data" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
+                                    <input type="date" id="cli-agend-data" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Hora</label>
-                                    <input type="time" id="agend-hora" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
+                                    <input type="time" id="cli-agend-hora" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:border-gray-600 dark:text-white" style="color-scheme: dark;">
                                 </div>
                             </div>
                             
@@ -468,7 +468,7 @@
             // Carregar Serviços
             const resServ = await fetch('/api/servicos');
             const servs = await resServ.json();
-            const selServ = document.getElementById('agend-servico');
+            const selServ = document.getElementById('cli-agend-servico'); // <-- ID CORRIGIDO
             selServ.innerHTML = '<option value="">Escolha o serviço</option>';
             if (servs) {
                 for (let id in servs) {
@@ -479,7 +479,7 @@
             // Carregar Funcionários
             const resFunc = await fetch('/api/contas/funcionarios');
             const funcs = await resFunc.json();
-            const selFunc = document.getElementById('agend-funcionario');
+            const selFunc = document.getElementById('cli-agend-funcionario'); // <-- ID CORRIGIDO
             selFunc.innerHTML = '<option value="">Escolha o profissional</option>';
             if (funcs) {
                  for (let id in funcs) {
@@ -534,16 +534,14 @@
         }
 
         async function marcarAgendamento() {
-            const servicoId = document.getElementById('agend-servico').value;
-            const funcionarioId = document.getElementById('agend-funcionario').value;
-            
-            // !! CORREÇÃO: Pega os valores dos campos separados
-            const data = document.getElementById('agend-data').value; // Pega 'YYYY-MM-DD'
-            const hora = document.getElementById('agend-hora').value; // Pega 'HH:MM'
+            // !! CORREÇÃO: IDs únicos para o painel do cliente !!
+            const servicoId = document.getElementById('cli-agend-servico').value;
+            const funcionarioId = document.getElementById('cli-agend-funcionario').value;
+            const data = document.getElementById('cli-agend-data').value;
+            const hora = document.getElementById('cli-agend-hora').value;
             
             if (!servicoId || !funcionarioId || !data || !hora) return mostrarToast("Preencha todos os campos.", "erro");
 
-            // !! CORREÇÃO: Junta a data e a hora com um ESPAÇO
             const dataHora = `${data} ${hora}`; // Formato "YYYY-MM-DD HH:MM"
 
             // Pega os nomes para salvar
