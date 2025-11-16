@@ -468,7 +468,7 @@
             // Carregar Serviços
             const resServ = await fetch('/api/servicos');
             const servs = await resServ.json();
-            const selServ = document.getElementById('cli-agend-servico'); // <-- ID CORRIGIDO
+            const selServ = document.getElementById('cli-agend-servico');
             selServ.innerHTML = '<option value="">Escolha o serviço</option>';
             if (servs) {
                 for (let id in servs) {
@@ -479,7 +479,8 @@
             // Carregar Funcionários
             const resFunc = await fetch('/api/contas/funcionarios');
             const funcs = await resFunc.json();
-            const selFunc = document.getElementById('cli-agend-funcionario'); // <-- ID CORRIGIDO
+            const selFunc = document.getElementById('cli-agend-funcionario');
+semic = ""
             selFunc.innerHTML = '<option value="">Escolha o profissional</option>';
             if (funcs) {
                  for (let id in funcs) {
@@ -542,6 +543,7 @@
             
             if (!servicoId || !funcionarioId || !data || !hora) return mostrarToast("Preencha todos os campos.", "erro");
 
+            // !! CORREÇÃO: Junta a data e a hora com um ESPAÇO
             const dataHora = `${data} ${hora}`; // Formato "YYYY-MM-DD HH:MM"
 
             // Pega os nomes para salvar
