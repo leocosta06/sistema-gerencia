@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Salão</title>
+    <title>SalãoApp - Sistema de Gestão</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
@@ -50,9 +50,6 @@
                 <input type="email" id="cad-email" placeholder="E-mail" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <input type="password" id="cad-senha" placeholder="Senha (Mín. 8, 1 Nº, 1 Maiúscula)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <input type="text" id="cad-telefone" placeholder="Telefone (opcional)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                <select id="cad-tipo" class="block w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                    <option value="cliente">Sou Cliente</option>
-                </select>
                 <button onclick="fazerCadastro()" class="w-full py-3 rounded-lg text-white font-bold bg-green-600 hover:bg-green-700 active:bg-green-800 transition-all transform active:scale-95">Registar</button>
                 <button onclick="toggleForms()" class="w-full py-3 rounded-lg text-gray-700 font-medium bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600 transition-all transform active:scale-95">Voltar</button>
             </div>
@@ -89,7 +86,6 @@
                 </div>
             </div>
         </nav>
-
         <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 fade-in">
 
             <!-- GERENTE -->
@@ -100,7 +96,6 @@
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Comissões</h3><p id="rel-comissoes">R$ 0.00</p></div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700"><h3 class="font-bold dark:text-white">Lucro</h3><p id="rel-lucro">R$ 0.00</p></div>
                 </div>
-
                 <div class="border-b border-gray-200 dark:border-gray-700">
                     <nav class="-mb-px flex space-x-6 overflow-x-auto">
                         <button class="tab-button active" onclick="abrirAba(event, 'agenda')">Agenda</button>
@@ -122,7 +117,7 @@
                     <h3 class="text-lg font-bold mb-4 dark:text-white">Gerir Serviços</h3>
                     <div class="mb-6 p-4 border dark:border-gray-700 rounded-lg">
                         <input id="serv-nome" placeholder="Nome" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:text-white">
-                        <input id="serv-valor" type="number" placeholder="Valor (R$)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:text-white">
+                        <input id="serv-valor" type="number" step="0.01" placeholder="Valor (R$)" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:text-white">
                         <input id="serv-comissao" type="number" placeholder="Comissão (%)" value="20" class="w-full border rounded-lg p-2 mb-2 dark:bg-gray-700 dark:text-white">
                         <button onclick="adicionarServico()" class="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">Salvar</button>
                     </div>
@@ -225,6 +220,8 @@
     <script>
         let currentUser = null;
         let servicoSelecionado = null, dataSelecionada = null, horaSelecionada = null;
+        let gerenteToken = null;
+
         lucide.createIcons();
 
         function mostrarToast(msg, tipo = "sucesso") {
@@ -251,36 +248,57 @@
         }
 
         async function fazerLogin(email, senha) {
-            email = email || document.getElementById('login-email').value;
+            email = email || document.getElementById('login-email').value.trim();
             senha = senha || document.getElementById('login-senha').value;
             if (!email || !senha) return mostrarToast("Preencha os campos", "erro");
-            const res = await fetch('/api/login', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email, senha }) });
+
+            const res = await fetch('/api/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, senha })
+            });
             const data = await res.json();
             if (data.success) {
                 currentUser = data.user;
                 localStorage.setItem('salaoUser', JSON.stringify(data.user));
                 showDashboard();
-            } else mostrarToast(data.message, "erro");
+            } else {
+                mostrarToast(data.message, "erro");
+            }
         }
 
-        function fazerLoginVisitante() { fazerLogin("demo@gerente.com", "Demo123456"); }
+        function fazerLoginVisitante() {
+            fazerLogin("demo@gerente.com", "Demo123456");
+        }
 
         async function fazerCadastro() {
-            const nome = document.getElementById('cad-nome').value;
-            const email = document.getElementById('cad-email').value;
+            const nome = document.getElementById('cad-nome').value.trim();
+            const email = document.getElementById('cad-email').value.trim();
             const senha = document.getElementById('cad-senha').value;
+            const telefone = document.getElementById('cad-telefone').value.trim();
+
             if (!nome || !email || !senha) return mostrarToast("Preencha tudo.", "erro");
             if (senha.length < 8 || !/\d/.test(senha) || !/[A-Z]/.test(senha)) return mostrarToast("Senha inválida.", "erro");
-            const res = await fetch('/api/register', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nome, email, senha, tipo_conta: 'cliente', telefone: document.getElementById('cad-telefone').value }) });
+
+            const res = await fetch('/api/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ nome, email, senha, telefone })
+            });
             const data = await res.json();
             mostrarToast(data.message, data.success ? "sucesso" : "erro");
             if (data.success) toggleForms();
         }
 
         async function solicitarRecuperacao() {
-            const email = document.getElementById('rec-email').value;
+            const email = document.getElementById('rec-email').value.trim();
             if (!email) return mostrarToast("Digite o e-mail.", "erro");
-            const res = await fetch('/api/recuperar-senha', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ email }) });
+
+            const res = await fetch('/api/recuperar-senha', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email })
+            });
             const data = await res.json();
             mostrarToast(data.message, data.success ? "sucesso" : "erro");
             if (data.success) voltarLogin();
@@ -290,11 +308,17 @@
             const s1 = document.getElementById('nova-senha1').value;
             const s2 = document.getElementById('nova-senha2').value;
             if (s1 !== s2 || s1.length < 8) return mostrarToast("Senhas não batem ou curta.", "erro");
-            fetch('/api/redefinir-senha', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ token: window.currentToken, nova_senha: s1 }) })
-                .then(r => r.json()).then(d => {
-                    mostrarToast(d.message, d.success ? "sucesso" : "erro");
-                    if (d.success) setTimeout(() => location.href = '/', 2000);
-                });
+
+            fetch('/api/redefinir-senha', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: window.currentToken, nova_senha: s1 })
+            })
+            .then(r => r.json())
+            .then(d => {
+                mostrarToast(d.message, d.success ? "sucesso" : "erro");
+                if (d.success) setTimeout(() => location.href = '/', 2000);
+            });
         }
 
         function fazerLogout() {
@@ -324,345 +348,24 @@
 
         // === GERENTE ===
         async function carregarDadosGerente() {
-            const [agendRes, servRes, relRes, funcsRes, clientesRes] = await Promise.all([
+            if (!gerenteToken) {
+                gerenteToken = prompt("Digite o token do gerente:");
+                if (!gerenteToken) return mostrarToast("Token necessário.", "erro");
+            }
+
+            const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${gerenteToken}` };
+            const [agendRes, servRes, relRes, funcsRes, clientesRes, contasRes] = await Promise.all([
                 fetch('/api/agendamentos'), fetch('/api/servicos'), fetch('/api/relatorio/geral'),
-                fetch('/api/contas/funcionarios'), fetch('/api/contas/clientes')
+                fetch('/api/contas/funcionarios'), fetch('/api/contas/clientes'), fetch('/api/contas/todos', { headers })
             ]);
+
             const agendamentos = await agendRes.json();
             const servicos = await servRes.json();
             const rel = await relRes.json();
             const funcs = await funcsRes.json();
             const clientes = await clientesRes.json();
+            const contas = await contasRes.json();
 
             document.getElementById('rel-faturamento').innerText = `R$ ${rel.faturamento_total.toFixed(2)}`;
             document.getElementById('rel-comissoes').innerText = `R$ ${rel.total_comissoes.toFixed(2)}`;
-            document.getElementById('rel-lucro').innerText = `R$ ${rel.lucro_bruto.toFixed(2)}`;
-
-            // Agenda
-            const lista = document.getElementById('lista-agendamentos-gerente');
-            lista.innerHTML = '';
-            for (let id in agendamentos) {
-                const a = agendamentos[id];
-                if (a.status === 'agendado') {
-                    lista.innerHTML += `<div class="flex justify-between items-center p-2 border-b dark:border-gray-700">
-                        <div><p class="font-medium">${a.nome_cliente} - ${a.nome_servico}</p><p class="text-sm text-gray-500">${a.data_agendamento.slice(0,16).replace(' ', ' às ')}</p></div>
-                        <button onclick="concluirAgendamento('${id}')" class="text-green-600 hover:text-green-800 text-sm font-bold">Concluir</button>
-                    </div>`;
-                }
-            }
-
-            // Serviços
-            const listaServ = document.getElementById('lista-servicos-gerente');
-            listaServ.innerHTML = '';
-            for (let id in servicos) {
-                const s = servicos[id];
-                listaServ.innerHTML += `<div class="flex justify-between items-center p-2 border-b dark:border-gray-700">
-                    <div><p class="font-medium">${s.nome} - R$ ${s.valor}</p><p class="text-sm text-gray-500">Comissão: ${s.comissao}%</p></div>
-                    <button onclick="apagarServico('${id}')" class="text-red-600 hover:text-red-800 text-sm">Apagar</button>
-                </div>`;
-            }
-
-            // Clientes
-            const selCli = document.getElementById('select-cliente-freq');
-            selCli.innerHTML = '<option value="">Selecione um cliente</option>';
-            for (let id in clientes) {
-                selCli.innerHTML += `<option value="${id}">${clientes[id].nome}</option>`;
-            }
-            selCli.onchange = async () => {
-                const cliId = selCli.value;
-                if (!cliId) return;
-                const res = await fetch(`/api/analise/cliente/${cliId}`);
-                const data = await res.json();
-                document.getElementById('info-frequencia').innerHTML = `<p class="text-lg font-bold">${data.total_visitas} visitas</p><p>${data.frequencia_msg} (desde ${data.cliente_desde})</p>`;
-            };
-
-            // Funcionários
-            const selFunc = document.getElementById('select-func-comissao');
-            selFunc.innerHTML = '<option value="">Selecione um funcionário</option>';
-            for (let id in funcs) {
-                selFunc.innerHTML += `<option value="${id}">${funcs[id].nome}</option>`;
-            }
-            selFunc.onchange = async () => {
-                const funcId = selFunc.value;
-                if (!funcId) return;
-                const res = await fetch(`/api/relatorio/funcionario/${funcId}`);
-                const data = await res.json();
-                document.getElementById('info-comissao').innerHTML = `<p class="text-lg font-bold">${data.total_atendimentos} atendimentos</p><p>Comissão: R$ ${data.comissao_total.toFixed(2)}</p>`;
-            };
-
-            carregarContasGerente();
-        }
-
-        function adicionarServico() {
-            const nome = document.getElementById('serv-nome').value;
-            const valor = parseFloat(document.getElementById('serv-valor').value);
-            const comissao = parseInt(document.getElementById('serv-comissao').value);
-            if (!nome || isNaN(valor) || isNaN(comissao)) return mostrarToast("Preencha corretamente.", "erro");
-            fetch('/api/servicos/add', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ nome, valor, comissao }) })
-                .then(r => r.json()).then(d => { if (d.success) { carregarDadosGerente(); document.getElementById('serv-nome').value = ''; } });
-        }
-
-        function apagarServico(id) {
-            if (!confirm("Apagar serviço?")) return;
-            fetch('/api/servicos/delete', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) })
-                .then(() => carregarDadosGerente());
-        }
-
-        function concluirAgendamento(id) {
-            fetch('/api/agendamentos/update', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id, status: 'concluido' }) })
-                .then(() => carregarDadosGerente());
-        }
-
-        async function carregarContasGerente() {
-            const res = await fetch('/api/contas/todos', { headers: { 'Authorization': 'Bearer gerente-secreto-temporario' } });
-            const contas = await res.json();
-            const div = document.getElementById('lista-contas-gerente');
-            div.innerHTML = '';
-            for (let id in contas) {
-                const c = contas[id];
-                if (c.tipo_conta === 'funcionario' || c.tipo_conta === 'gerente') {
-                    div.innerHTML += `<div class="flex justify-between items-center border-b p-2 dark:border-gray-700">
-                        <div><p class="font-medium dark:text-white">${c.nome} (${c.email})</p><p class="text-sm text-gray-500 dark:text-gray-400">${c.tipo_conta}</p></div>
-                        <button onclick="apagarConta('${id}')" class="text-red-600 hover:text-red-800 text-sm font-bold">Apagar</button>
-                    </div>`;
-                }
-            }
-        }
-
-        async function criarContaAdmin() {
-            const nome = document.getElementById('nova-nome').value;
-            const email = document.getElementById('nova-email').value;
-            const senha = document.getElementById('nova-senha').value;
-            const tipo = document.getElementById('nova-tipo').value;
-            if (!nome || !email || !senha || senha.length < 8) return mostrarToast("Preencha tudo.", "erro");
-            const res = await fetch('/api/contas/criar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer gerente-secreto-temporario' },
-                body: JSON.stringify({ nome, email, senha, tipo_conta: tipo })
-            });
-            const data = await res.json();
-            mostrarToast(data.message, data.success ? "sucesso" : "erro");
-            if (data.success) carregarContasGerente();
-        }
-
-        function apagarConta(id) {
-            if (!confirm("Apagar conta?")) return;
-            fetch('/api/contas/apagar', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer gerente-secreto-temporario' },
-                body: JSON.stringify({ id })
-            }).then(() => carregarContasGerente());
-        }
-
-        // === CLIENTE ===
-        async function carregarListasAgendamento() {
-            const res = await fetch('/api/servicos');
-            const servicos = await res.json();
-            const sel = document.getElementById('cli-servico');
-            sel.innerHTML = '<option value="">Selecione um serviço</option>';
-            for (let id in servicos) {
-                sel.innerHTML += `<option value="${id}">${servicos[id].nome} (R$ ${servicos[id].valor}) - 1h</option>`;
-            }
-        }
-
-        function carregarDatasDisponiveis() {
-            const servicoId = document.getElementById('cli-servico').value;
-            if (!servicoId) {
-                document.getElementById('bloco-data').classList.add('hidden');
-                return;
-            }
-            servicoSelecionado = servicoId;
-            document.getElementById('bloco-data').classList.remove('hidden');
-            document.getElementById('cli-data').min = new Date().toISOString().split('T')[0];
-        }
-
-        async function carregarHorariosDisponiveis() {
-            const data = document.getElementById('cli-data').value;
-            if (!data) return;
-            dataSelecionada = data;
-
-            const agendamentos = await (await fetch('/api/agendamentos')).json();
-            const horariosOcupados = new Set();
-
-            for (let id in agendamentos) {
-                const ag = agendamentos[id];
-                if (ag.status === 'agendado') {
-                    const [agData, agHora] = ag.data_agendamento.split(' ');
-                    if (agData === data) {
-                        const horaInicio = parseInt(agHora.split(':')[0]);
-                        horariosOcupados.add(horaInicio);
-                    }
-                }
-            }
-
-            const selHora = document.getElementById('cli-hora');
-            selHora.innerHTML = '<option value="">Selecione um horário</option>';
-            const hoje = new Date().toISOString().split('T')[0];
-
-            for (let h = 9; h < 19; h++) {
-                const horaStr = `${h.toString().padStart(2, '0')}:00`;
-                const dataHora = `${data} ${horaStr}`;
-                const dt = new Date(dataHora);
-
-                if (data === hoje && dt < new Date()) continue;
-                if (dt.getDay() === 0) continue;
-                if (horariosOcupados.has(h)) continue;
-
-                selHora.innerHTML += `<option value="${horaStr}">${horaStr}</option>`;
-            }
-
-            document.getElementById('bloco-hora').classList.remove('hidden');
-        }
-
-        async function carregarFuncionariosLivres() {
-            const hora = document.getElementById('cli-hora').value;
-            if (!hora) return;
-            horaSelecionada = hora;
-
-            const dataHoraInicio = `${dataSelecionada} ${hora}:00`;
-            const dataHoraFim = new Date(new Date(dataHoraInicio).getTime() + 60*60*1000).toISOString().slice(11, 16);
-
-            const agendamentos = await (await fetch('/api/agendamentos')).json();
-            const funcionariosOcupados = new Set();
-
-            for (let id in agendamentos) {
-                const ag = agendamentos[id];
-                if (ag.status === 'agendado') {
-                    const inicio = ag.data_agendamento;
-                    const fim = new Date(new Date(inicio).getTime() + 60*60*1000).toISOString().slice(0, 16);
-                    if (dataHoraInicio < fim && inicio < `${dataSelecionada} ${dataHoraFim}`) {
-                        funcionariosOcupados.add(ag.id_funcionario);
-                    }
-                }
-            }
-
-            const funcs = await (await fetch('/api/contas/funcionarios')).json();
-            const selFunc = document.getElementById('cli-funcionario');
-            selFunc.innerHTML = '<option value="">Selecione um profissional</option>';
-
-            for (let id in funcs) {
-                if (!funcionariosOcupados.has(id)) {
-                    selFunc.innerHTML += `<option value="${id}">${funcs[id].nome}</option>`;
-                }
-            }
-
-            document.getElementById('bloco-funcionario').classList.remove('hidden');
-        }
-
-        async function marcarAgendamento() {
-            const funcionarioId = document.getElementById('cli-funcionario').value;
-            if (!funcionarioId) return mostrarToast("Escolha um profissional.", "erro");
-
-            const servicos = await (await fetch('/api/servicos')).json();
-            const funcs = await (await fetch('/api/contas/funcionarios')).json();
-
-            const payload = {
-                id_cliente: currentUser.id,
-                nome_cliente: currentUser.nome,
-                id_funcionario: funcionarioId,
-                nome_funcionario: funcs[funcionarioId].nome,
-                id_servico: servicoSelecionado,
-                nome_servico: servicos[servicoSelecionado].nome,
-                valor_servico: servicos[servicoSelecionado].valor,
-                comissao_percentual: servicos[servicoSelecionado].comissao,
-                data_agendamento: `${dataSelecionada} ${horaSelecionada}:00`
-            };
-
-            const res = await fetch('/api/agendamentos', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            const result = await res.json();
-
-            mostrarToast(result.message, result.success ? "sucesso" : "erro");
-            if (result.success) {
-                location.reload();
-            }
-        }
-
-        async function carregarMeusAgendamentos() {
-            const agendamentos = await (await fetch('/api/agendamentos')).json();
-            const lista = document.getElementById('meus-agendamentos-lista');
-            lista.innerHTML = '';
-            for (let id in agendamentos) {
-                const a = agendamentos[id];
-                if (a.id_cliente === currentUser.id) {
-                    lista.innerHTML += `<div class="p-3 border rounded-lg dark:border-gray-700">
-                        <p class="font-medium">${a.nome_servico} com ${a.nome_funcionario}</p>
-                        <p class="text-sm text-gray-500">${a.data_agendamento.slice(0,16).replace(' ', ' às ')} - ${a.status}</p>
-                    </div>`;
-                }
-            }
-        }
-
-        // === FUNCIONÁRIO ===
-        async function carregarAgendaFuncionario() {
-            const agendamentos = await (await fetch('/api/agendamentos')).json();
-            const lista = document.getElementById('lista-agendamentos-func-pendentes');
-            lista.innerHTML = '';
-            for (let id in agendamentos) {
-                const a = agendamentos[id];
-                if (a.id_funcionario === currentUser.id && a.status === 'agendado') {
-                    lista.innerHTML += `<div class="p-2 border-b dark:border-gray-700">
-                        <p class="font-medium">${a.nome_cliente} - ${a.nome_servico}</p>
-                        <p class="text-sm">${a.data_agendamento.slice(0,16).replace(' ', ' às ')}</p>
-                    </div>`;
-                }
-            }
-        }
-
-        async function carregarGanhosFuncionario() {
-            const res = await fetch(`/api/relatorio/funcionario/${currentUser.id}`);
-            const data = await res.json();
-            document.getElementById('func-comissao').innerText = `R$ ${data.comissao_total.toFixed(2)}`;
-            document.getElementById('func-atendimentos').innerText = data.total_atendimentos;
-
-            const agendamentos = await (await fetch('/api/agendamentos')).json();
-            const lista = document.getElementById('lista-agendamentos-func-concluidos');
-            lista.innerHTML = '';
-            for (let id in agendamentos) {
-                const a = agendamentos[id];
-                if (a.id_funcionario === currentUser.id && a.status === 'concluido') {
-                    lista.innerHTML += `<div class="p-2 border-b dark:border-gray-700">
-                        <p>${a.nome_cliente} - ${a.nome_servico} (R$ ${a.valor_servico})</p>
-                        <p class="text-sm text-green-600">Comissão: R$ ${(a.valor_servico * a.comissao_percentual / 100).toFixed(2)}</p>
-                    </div>`;
-                }
-            }
-        }
-
-        // === ABAS ===
-        function abrirAba(evt, tabName) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabName).classList.remove('hidden');
-            evt.currentTarget.classList.add('active');
-        }
-
-        function abrirAbaFunc(evt, tabName) {
-            document.querySelectorAll('.tab-content-func').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.tab-button-func').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabName).classList.remove('hidden');
-            evt.currentTarget.classList.add('active');
-        }
-
-        // === INICIALIZAÇÃO ===
-        window.onload = () => {
-            const urlParams = new URLSearchParams(window.location.search);
-            const token = urlParams.get('token');
-            if (token) {
-                document.getElementById('app-login').classList.add('hidden');
-                document.getElementById('pagina-redefinir').classList.remove('hidden');
-                window.currentToken = token;
-            } else {
-                const user = localStorage.getItem('salaoUser');
-                if (user) {
-                    currentUser = JSON.parse(user);
-                    showDashboard();
-                }
-            }
-        };
-    </script>
-</body>
-</html>
+            document.getElementById('rel-lucro').innerText = `R$ ${rel.luc
