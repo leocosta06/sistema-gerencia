@@ -70,6 +70,7 @@
             <div id="form-cadastro" class="hidden space-y-4">
                 <input type="text" id="cad-nome" placeholder="Nome Completo" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <input type="email" id="cad-email" placeholder="E-mail" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <!-- !! CORREÇÃO: ID correto !! -->
                 <input type="password" id="cad-senha" placeholder="Senha (Mín. 8, 1 Nº, 1 Maiúscula)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <input type="text" id="cad-telefone" placeholder="Telefone (opcional)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <select id="cad-tipo" class="block w-full px-4 py-3 border rounded-lg bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white">
@@ -160,7 +161,7 @@
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
                         <h3 class="text-lg font-bold mb-4 dark:text-white">Marcar Horário</h3>
                         <div class="space-y-4">
-                            <!-- !! CORREÇÃO: IDs únicos para o painel do cliente !! -->
+                            <!-- IDs únicos para o painel do cliente -->
                             <select id="cli-agend-servico" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
                             <select id="cli-agend-funcionario" class="w-full border rounded-lg p-2.5 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white"></select>
                             
@@ -175,7 +176,8 @@
                                 </div>
                             </div>
                             
-                            <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 active:bg-blue-800 transition-all transform active:scale-95">Confirmar</g-button>
+                            <!-- !! CORREÇÃO: Tag </button> correta !! -->
+                            <button onclick="marcarAgendamento()" class="w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700 active:bg-blue-800 transition-all transform active:scale-95">Confirmar</button>
                         </div>
                     </div>
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
@@ -325,7 +327,8 @@
         async function fazerCadastro() {
             const nome = document.getElementById('cad-nome').value;
             const email = document.getElementById('cad-email').value;
-            const senha = document.getElementById('cad-pass').value;
+            // !! CORREÇÃO: ID correto !!
+            const senha = document.getElementById('cad-senha').value; 
             const tipo = document.getElementById('cad-tipo').value;
             const telefone = document.getElementById('cad-telefone').value;
 
@@ -411,8 +414,8 @@
                     }
                 }
             }
-            if (divPendentes.innerHTML === '') divPendentes.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum horário pendente.</p>";
-            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class='text-gray-500 dark:text-gray-400'>Nenhum atendimento concluído.</p>";
+            if (divPendentes.innerHTML === '') divPendentes.innerHTML = "<p class'text-gray-500 dark:text-gray-400'>Nenhum horário pendente.</p>";
+            if (divConcluidos.innerHTML === '') divConcluidos.innerHTML = "<p class'text-gray-500 dark:text-gray-400'>Nenhum atendimento concluído.</p>";
         }
         
         async function carregarSelectsGerente() {
@@ -468,7 +471,7 @@
             // Carregar Serviços
             const resServ = await fetch('/api/servicos');
             const servs = await resServ.json();
-            const selServ = document.getElementById('cli-agend-servico');
+            const selServ = document.getElementById('cli-agend-servico'); // <-- ID CORRIGIDO
             selServ.innerHTML = '<option value="">Escolha o serviço</option>';
             if (servs) {
                 for (let id in servs) {
@@ -479,8 +482,7 @@
             // Carregar Funcionários
             const resFunc = await fetch('/api/contas/funcionarios');
             const funcs = await resFunc.json();
-            const selFunc = document.getElementById('cli-agend-funcionario');
-semic = ""
+            const selFunc = document.getElementById('cli-agend-funcionario'); // <-- ID CORRIGIDO
             selFunc.innerHTML = '<option value="">Escolha o profissional</option>';
             if (funcs) {
                  for (let id in funcs) {
