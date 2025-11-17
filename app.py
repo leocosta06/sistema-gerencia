@@ -67,7 +67,7 @@ def enviar_email_recuperacao(email, token):
         app.logger.error(f"Erro ao enviar e-mail: {e}")
         return False
 
-# === ROTAS ===
+# === ROTAS ESTÁTICAS ===
 @app.route('/')
 def index():
     return send_from_directory('templates', 'index.html')
@@ -94,6 +94,55 @@ def api_login():
             }
         })
     return jsonify({"success": False, "message": "E-mail ou senha incorretos."})
+
+# === CADASTRO DE NOVA CONTA ===
+@app.route('/api/cadastrar', methods=['POST'])
+def api_cadastrar():
+    data = request.get_json()
+    email = data.get('email')
+    senha = data.get('senha')
+    nome = data.get('nome')
+    tipo_conta = data.get('tipo_conta', 'funcionario')
+
+    # Validações
+    if not email or not senha or not nome:
+        return jsonify({"success": False, "message": "Preencha todos os campos."})
+
+    if email in usuarios:
+        return jsonify({"success": False, "message": "E-mail já cadastrado."})
+
+    if len(senha) < 6:
+        return jsonify({"success": False, "message": "A senha deve ter pelo menos 6 caracteres."})
+
+    if tipo_conta not in ['gerente', 'funcionario']:
+        return jsonify({"success": False, "message": "Tipo de conta inválido."})
+
+    # Só gerente pode criar outro gerente
+    if tipo_conta == 'gerente':
+        token_fornecido = data.get('token_gerente')
+        if token_fornecido != GERENTE_TOKEN:
+            return jsonify({"success": False, "message": "Token de gerente inválido."})
+
+    # Cria usuário
+    novo_id = max([u["id"] for u in usuarios.values()], default=0) + 1
+    usuarios[email] = {
+        "id": novo_id,
+        "nome": nome,
+        "senha": senha,
+        "tipo_conta": tipo_conta
+    }
+
+    app.logger.info(f"Novo usuário cadastrado: {email} ({tipo_conta})")
+
+    return jsonify({
+        "success": True,
+        "message": "Cadastro realizado com sucesso!",
+        "user": {
+            "id": novo_id,
+            "nome": nome,
+            "tipo_conta": tipo_conta
+        }
+    })
 
 # === RECUPERAÇÃO DE SENHA ===
 @app.route('/api/recuperar-senha', methods=['POST'])
@@ -144,7 +193,12 @@ def api_agendamentos():
 
 @app.route('/api/contas/funcionarios')
 def api_funcionarios():
-    return jsonify({})
+    funcs = {email: u for email, u in usuarios.items() if u["tipo_conta"] == "funcionario"}
+    return jsonify(funcs)
+
+@app.route('/api/contas/todos')
+def api_todas_contas():
+    return jsonify(usuarios)
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
