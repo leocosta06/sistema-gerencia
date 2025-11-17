@@ -1,16 +1,11 @@
 from flask import Flask, request, jsonify, send_from_directory
 import os
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
 from datetime import datetime
 import secrets
 
 app = Flask(__name__, template_folder='templates')
 
 # === CONFIGS ===
-EMAIL_USER = os.environ.get('EMAIL_USER')
-EMAIL_PASS = os.environ.get('EMAIL_PASS')
 RENDER_HOST = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost:8080')
 GERENTE_TOKEN = os.environ.get('GERENTE_TOKEN', 'leonardo123')
 
@@ -18,7 +13,7 @@ GERENTE_TOKEN = os.environ.get('GERENTE_TOKEN', 'leonardo123')
 usuarios = {
     "leonardocalmeida2@gmail.com": {
         "id": 1,
-        "nome": "Leonardo Almeida",
+        "nome": "DEMO",
         "senha": "Demo123456",
         "tipo_conta": "gerente"
     }
@@ -29,39 +24,6 @@ servicos = {
     "1": {"nome": "Corte Masculino", "valor": 50.0, "comissao_percentual": 30}
 }
 
-tokens_recuperacao = {}
-
-# === FUNÇÃO DE E-MAIL ===
-def enviar_email_recuperacao(email, token):
-    if not EMAIL_USER or not EMAIL_PASS:
-        app.logger.warning("E-mail não configurado!")
-        return False
-
-    msg = MIMEMultipart()
-    msg['From'] = EMAIL_USER
-    msg['To'] = email
-    msg['Subject'] = "Redefinição de Senha - SalãoApp"
-
-    link = f"https://{RENDER_HOST}/redefinir-senha?token={token}"
-    corpo = f"""
-    <h2>Redefinição de Senha</h2>
-    <p>Clique no link para redefinir sua senha:</p>
-    <p><a href="{link}" style="color:#2563eb;font-weight:bold;text-decoration:underline;">{link}</a></p>
-    <p><strong>Expira em 15 minutos.</strong></p>
-    <p>Se não solicitou, ignore.</p>
-    <hr><small>SalãoApp</small>
-    """
-    msg.attach(MIMEText(corpo, 'html'))
-
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465) as server:
-            server.login(EMAIL_USER, EMAIL_PASS)
-            server.send_message(msg)
-        return True
-    except Exception as e:
-        app.logger.error(f"Erro e-mail: {e}")
-        return False
-
 # === ROTAS ESTÁTICAS ===
 @app.route('/')
 def index():
@@ -71,12 +33,24 @@ def index():
 def pagina_redefinir():
     return send_from_directory('templates', 'index.html')
 
-# === AUTENTICAÇÃO ===
+# === LOGIN ===
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = request.get_json()
     email = data.get('email')
     senha = data.get('senha')
+
+    # MODO DEMO
+    if email == "demo@salao.com" and senha == "demo":
+        return jsonify({
+            "success": True,
+            "user": {
+                "id": 999,
+                "nome": "Demo Gerente",
+                "tipo_conta": "gerente"
+            },
+            "demo": True
+        })
 
     user = usuarios.get(email)
     if user and user['senha'] == senha:
@@ -86,17 +60,19 @@ def api_login():
                 "id": user["id"],
                 "nome": user["nome"],
                 "tipo_conta": user["tipo_conta"]
-            }
+            },
+            "demo": False
         })
     return jsonify({"success": False, "message": "E-mail ou senha incorretos."})
 
+# === CADASTRO (CLIENTE, FUNCIONÁRIO, GERENTE) ===
 @app.route('/api/cadastrar', methods=['POST'])
 def api_cadastrar():
     data = request.get_json()
     email = data.get('email')
     senha = data.get('senha')
     nome = data.get('nome')
-    tipo_conta = data.get('tipo_conta', 'funcionario')
+    tipo_conta = data.get('tipo_conta', 'cliente')
     token_gerente = data.get('token_gerente')
 
     if not all([email, senha, nome]):
@@ -108,11 +84,11 @@ def api_cadastrar():
     if len(senha) < 6:
         return jsonify({"success": False, "message": "Senha deve ter 6+ caracteres."})
 
-    if tipo_conta not in ['gerente', 'funcionario']:
+    if tipo_conta not in ['cliente', 'funcionario', 'gerente']:
         return jsonify({"success": False, "message": "Tipo inválido."})
 
     if tipo_conta == 'gerente' and token_gerente != GERENTE_TOKEN:
-        return jsonify({"success": False, "message": "Token de gerente inválido."})
+        return jsonify({"success": False, "message": "Token inválido."})
 
     novo_id = max([u["id"] for u in usuarios.values()], default=0) + 1
     usuarios[email] = {
@@ -128,46 +104,21 @@ def api_cadastrar():
         "user": {"id": novo_id, "nome": nome, "tipo_conta": tipo_conta}
     })
 
-# === RECUPERAÇÃO DE SENHA ===
-@app.route('/api/recuperar-senha', methods=['POST'])
-def api_recuperar_senha():
-    data = request.get_json()
-    email = data.get('email')
-    if email not in usuarios:
-        return jsonify({"success": False, "message": "E-mail não encontrado."})
-
-    token = secrets.token_urlsafe(32)
-    tokens_recuperacao[token] = {"email": email, "expira": datetime.now().timestamp() + 900}
-
-    if enviar_email_recuperacao(email, token):
-        return jsonify({"success": True, "message": "Link enviado!"})
-    return jsonify({"success": False, "message": "Erro ao enviar."})
-
-@app.route('/api/redefinir-senha', methods=['POST'])
-def api_redefinir_senha():
-    data = request.get_json()
-    token = data.get('token')
-    nova_senha = data.get('nova_senha')
-
-    if token not in tokens_recuperacao:
-        return jsonify({"success": False, "message": "Token inválido."})
-
-    info = tokens_recuperacao[token]
-    if datetime.now().timestamp() > info["expira"]:
-        del tokens_recuperacao[token]
-        return jsonify({"success": False, "message": "Token expirado."})
-
-    usuarios[info["email"]]["senha"] = nova_senha
-    del tokens_recuperacao[token]
-    return jsonify({"success": True, "message": "Senha alterada!"})
+# === RECUPERAÇÃO DE SENHA (TEMPORARIAMENTE DESATIVADA) ===
+# @app.route('/api/recuperar-senha', methods=['POST'])
+# def api_recuperar_senha():
+#     return jsonify({"success": False, "message": "Recuperação de senha temporariamente desativada."})
+#
+# @app.route('/api/redefinir-senha', methods=['POST'])
+# def api_redefinir_senha():
+#     return jsonify({"success": False, "message": "Recuperação de senha temporariamente desativada."})
 
 # === SERVIÇOS ===
-@app.route('/api/servicos', methods=['GET'])
-def api_listar_servicos():
-    return jsonify(servicos)
+@app.route('/api/servicos', methods=['GET', 'POST'])
+def api_servicos():
+    if request.method == 'GET':
+        return jsonify(servicos)
 
-@app.route('/api/servicos', methods=['POST'])
-def api_adicionar_servico():
     data = request.get_json()
     nome = data.get('nome')
     valor = data.get('valor')
@@ -192,25 +143,25 @@ def api_apagar_servico(id):
     return jsonify({"success": False, "message": "Serviço não encontrado."})
 
 # === AGENDAMENTOS ===
-@app.route('/api/agendamentos', methods=['GET'])
-def api_listar_agendamentos():
-    return jsonify(agendamentos)
+@app.route('/api/agendamentos', methods=['GET', 'POST'])
+def api_agendamentos():
+    if request.method == 'GET':
+        return jsonify(agendamentos)
 
-@app.route('/api/agendamentos', methods=['POST'])
-def api_criar_agendamento():
     data = request.get_json()
     servico_id = data.get('servico_id')
-    data_hora = data.get('data_hora')  # "2025-11-18 10:00"
-    cliente_nome = data.get('cliente_nome')
+    data_hora = data.get('data_hora')
+    cliente_id = data.get('cliente_id')
     funcionario_id = data.get('funcionario_id', 1)
 
-    if not all([servico_id, data_hora, cliente_nome]):
+    if not all([servico_id, data_hora, cliente_id]):
         return jsonify({"success": False, "message": "Dados incompletos."})
 
     if servico_id not in servicos:
         return jsonify({"success": False, "message": "Serviço inválido."})
 
     novo_id = str(max([int(k) for k in agendamentos.keys()], default=0) + 1)
+    cliente = next((u for u in usuarios.values() if u["id"] == int(cliente_id)), None)
     agendamentos[novo_id] = {
         "id": novo_id,
         "servico_id": servico_id,
@@ -218,7 +169,8 @@ def api_criar_agendamento():
         "valor": servicos[servico_id]["valor"],
         "comissao_percentual": servicos[servico_id]["comissao_percentual"],
         "data_agendamento": data_hora,
-        "nome_cliente": cliente_nome,
+        "cliente_id": cliente_id,
+        "nome_cliente": cliente["nome"] if cliente else "Cliente",
         "funcionario_id": funcionario_id,
         "status": "agendado"
     }
@@ -227,30 +179,11 @@ def api_criar_agendamento():
 @app.route('/api/agendamentos/<id>/concluir', methods=['PATCH'])
 def api_concluir_agendamento(id):
     if id not in agendamentos:
-        return jsonify({"success": False, "message": "Agendamento não encontrado."})
+        return jsonify({"success": False, "message": "Não encontrado."})
     agendamentos[id]["status"] = "concluido"
     return jsonify({"success": True})
 
-# === CONTAS (GERENTE) ===
-@app.route('/api/contas', methods=['GET'])
-def api_listar_contas():
-    return jsonify(usuarios)
-
-@app.route('/api/contas', methods=['POST'])
-def api_criar_conta_admin():
-    data = request.get_json()
-    return api_cadastrar().get_json()  # Reutiliza cadastro
-
-@app.route('/api/contas/<email>', methods=['DELETE'])
-def api_apagar_conta(email):
-    if email not in usuarios:
-        return jsonify({"success": False, "message": "Usuário não encontrado."})
-    if usuarios[email]["tipo_conta"] == "gerente" and len([u for u in usuarios.values() if u["tipo_conta"] == "gerente"]) == 1:
-        return jsonify({"success": False, "message": "Não pode apagar o último gerente."})
-    del usuarios[email]
-    return jsonify({"success": True})
-
-# === RELATÓRIOS (GERENTE) ===
+# === RELATÓRIOS ===
 @app.route('/api/relatorios/financeiro')
 def api_relatorio_financeiro():
     concluidos = [a for a in agendamentos.values() if a["status"] == "concluido"]
@@ -263,11 +196,30 @@ def api_relatorio_financeiro():
         "lucro": round(lucro, 2)
     })
 
-# === FUNCIONÁRIOS ===
-@app.route('/api/funcionarios')
-def api_funcionarios():
-    funcs = {email: u for email, u in usuarios.items() if u["tipo_conta"] == "funcionario"}
-    return jsonify(funcs)
+@app.route('/api/relatorios/funcionario/<int:func_id>')
+def api_relatorio_funcionario(func_id):
+    atendimentos = [a for a in agendamentos.values() if a["funcionario_id"] == func_id and a["status"] == "concluido"]
+    total_comissao = sum(a["valor"] * a["comissao_percentual"] / 100 for a in atendimentos)
+    return jsonify({
+        "comissao": round(total_comissao, 2),
+        "atendimentos": len(atendimentos)
+    })
+
+# === CONTAS ===
+@app.route('/api/contas', methods=['GET', 'POST'])
+def api_contas():
+    if request.method == 'GET':
+        return jsonify(usuarios)
+    return api_cadastrar().get_json()
+
+@app.route('/api/contas/<email>', methods=['DELETE'])
+def api_apagar_conta(email):
+    if email not in usuarios:
+        return jsonify({"success": False, "message": "Não encontrado."})
+    if usuarios[email]["tipo_conta"] == "gerente" and len([u for u in usuarios.values() if u["tipo_conta"] == "gerente"]) == 1:
+        return jsonify({"success": False, "message": "Não pode apagar o último gerente."})
+    del usuarios[email]
+    return jsonify({"success": True})
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
