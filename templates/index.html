@@ -5,75 +5,94 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SalãoApp - Demo Gerente</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>.hidden{display:none;}</style>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
-    <!-- LOGIN DEMO -->
-    <div id="login" class="flex items-center justify-center min-h-screen">
+    <!-- LOGIN -->
+    <div id="login" class="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-500 to-purple-600">
         <div class="bg-white p-10 rounded-2xl shadow-2xl text-center max-w-md">
             <h1 class="text-4xl font-bold text-blue-600 mb-4">SalãoApp</h1>
-            <p class="text-gray-600 mb-8">Demo para Portfólio - Apenas Gerente</p>
-            
-            <div class="bg-yellow-50 border border-yellow-300 p-6 rounded-xl mb-6">
-                <p class="font-bold text-yellow-800 mb-3">Acesso Demo (Gerente)</p>
-                <p class="text-sm"><strong>E-mail:</strong> gerente@salao.com</p>
-                <p class="text-sm mb-4"><strong>Senha:</strong> demo123</p>
-                <button onclick="loginDemo()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">
-                    Entrar como Gerente (Demo)
+            <p class="text-gray-600 mb-8">Demo Completa - Gerente</p>
+            <div class="bg-green-50 border border-green-300 p-6 rounded-xl">
+                <p class="font-bold text-green-800 mb-3">Acesso Demo</p>
+                <p class="text-sm">E-mail: <strong>gerente@salao.com</strong></p>
+                <p class="text-sm mb-4">Senha: <strong>demo123</strong></p>
+                <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700">
+                    Entrar como Gerente
                 </button>
             </div>
-
-            <p class="text-xs text-gray-500">
-                Funcionalidades de Cliente e Funcionário desativadas temporariamente.
-            </p>
         </div>
     </div>
 
-    <!-- DASHBOARD GERENTE -->
+    <!-- DASHBOARD -->
     <div id="dashboard" class="hidden">
         <nav class="bg-blue-600 text-white p-4 shadow-lg">
             <div class="max-w-6xl mx-auto flex justify-between items-center">
                 <h2 class="text-2xl font-bold">SalãoApp - Gerente</h2>
-                <button onclick="logout()" class="bg-red-500 px-4 py-2 rounded hover:bg-red-600">Sair</button>
+                <button onclick="logout()" class="bg-red-500 px-6 py-2 rounded hover:bg-red-600">Sair</button>
             </div>
         </nav>
 
-        <div class="max-w-6xl mx-auto p-6">
-            <h1 class="text-3xl font-bold mb-8">Bem-vindo, Leonardo!</h1>
+        <div class="max-w-6xl mx-auto p-8">
 
-            <!-- CARDS FINANCEIROS -->
+            <!-- RELATÓRIO -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                <div class="bg-white p-6 rounded-xl shadow-lg border">
-                    <h3 class="text-gray-600">Faturamento</h3>
-                    <p id="faturamento" class="text-4xl font-bold text-green-600">R$ 0,00</p>
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+                    <h3 class="text-gray-600 text-lg">Faturamento</h3>
+                    <p id="fat" class="text-4xl font-bold text-green-600">R$ 0,00</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg border">
-                    <h3 class="text-gray-600">Comissões</h3>
-                    <p id="comissoes" class="text-4xl font-bold text-orange-600">R$ 0,00</p>
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+                    <h3 class="text-gray-600 text-lg">Comissões</h3>
+                    <p id="com" class="text-4xl font-bold text-orange-600">R$ 0,00</p>
                 </div>
-                <div class="bg-white p-6 rounded-xl shadow-lg border">
-                    <h3 class="text-gray-600">Lucro Líquido</h3>
-                    <p id="lucro" class="text-4xl font-bold text-blue-600">R$ 0,00</p>
+                <div class="bg-white p-8 rounded-xl shadow-lg text-center">
+                    <h3 class="text-gray-600 text-lg">Lucro</h3>
+                    <p id="luc" class="text-4xl font-bold text-blue-600">R$ 0,00</p>
                 </div>
             </div>
 
-            <!-- SERVIÇOS -->
-            <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
-                <h3 class="text-xl font-bold mb-4">Serviços Cadastrados</h3>
-                <div id="lista-servicos" class="space-y-3"></div>
-            </div>
+            <div class="grid md:grid-cols-2 gap-8">
 
-            <!-- AGENDA -->
-            <div class="bg-white p-6 rounded-xl shadow-lg">
-                <h3 class="text-xl font-bold mb-4">Agenda do Dia</h3>
-                <div id="lista-agenda" class="space-y-3"></div>
+                <!-- ADICIONAR SERVIÇO -->
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4">Adicionar Serviço</h3>
+                    <input id="novo-nome" placeholder="Nome" class="w-full p-3 border rounded mb-3">
+                    <input id="novo-valor" type="number" placeholder="Valor R$" class="w-full p-3 border rounded mb-3">
+                    <input id="novo-comissao" type="number" placeholder="Comissão %" class="w-full p-3 border rounded mb-4">
+                    <button onclick="addServico()" class="w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700">
+                        Adicionar Serviço
+                    </button>
+                    <div id="lista-servicos" class="mt-6 space-y-3"></div>
+                </div>
+
+                <!-- COMISSÃO POR FUNCIONÁRIO -->
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4">Comissão dos Funcionários</h3>
+                    <div id="comissoes-func" class="space-y-4 text-lg"></div>
+                </div>
+
+                <!-- CRIAR CONTA -->
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-2xl font-bold mb-4">Criar Nova Conta</h3>
+                    <input id="c-nome" placeholder="Nome" class="w-full p-3 border rounded mb-3">
+                    <input id="c-email" placeholder="E-mail" class="w-full p-3 border rounded mb-3">
+                    <input id="c-senha" placeholder="Senha" class="w-full p-3 border rounded mb-3">
+                    <select id="c-tipo" class="w-full p-3 border rounded mb-3">
+                        <option value="funcionario">Funcionário</option>
+                        <option value="gerente">Gerente (precisa token)</option>
+                    </select>
+                    <input id="c-token" placeholder="Token (só para gerente): leonardo123" class="w-full p-3 border rounded mb-4 hidden">
+                    <button onclick="criarConta()" class="w-full bg-green-600 text-white py-3 rounded font-bold hover:bg-green-700">
+                        Criar Conta
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>
 
     <script>
-        function loginDemo() {
+        function login() {
             fetch('/api/login', {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
@@ -87,42 +106,57 @@
             });
         }
 
-        function logout() {
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('login').classList.remove('hidden');
-        }
+        function logout() { location.reload(); }
 
         async function carregarTudo() {
-            // Relatório
-            const rel = await fetch('/api/relatorios/financeiro').then(r => r.json());
-            document.getElementById('faturamento').innerText = `R$ ${rel.faturamento}`;
-            document.getElementById('comissoes').innerText = `R$ ${rel.comissoes}`;
-            document.getElementById('lucro').innerText = `R$ ${rel.lucro}`;
+            const rel = await fetch('/api/relatorio').then(r => r.json());
+            document.getElementById('fat').innerText = `R$ ${rel.faturamento}`;
+            document.getElementById('com').innerText = `R$ ${rel.comissoes}`;
+            document.getElementById('luc').innerText = `R$ ${rel.lucro}`;
 
-            // Serviços
             const serv = await fetch('/api/servicos').then(r => r.json());
             document.getElementById('lista-servicos').innerHTML = Object.values(serv).map(s => 
-                `<div class="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-                    <div><strong>${s.nome}</strong> - R$ ${s.valor} (Comissão: ${s.comissao_percentual}%)</div>
+                `<div class="p-4 bg-gray-50 rounded flex justify-between">
+                    <div><strong>${s.nome}</strong> - R$ ${s.valor} (${s.comissao_percentual}%)</div>
                 </div>`
             ).join('');
 
-            // Agenda
-            const agend = await fetch('/api/agendamentos').then(r => r.json());
-            document.getElementById('lista-agenda').innerHTML = Object.values(agend).map(a => 
-                `<div class="flex justify-between items-center p-4 border rounded-lg ${a.status==='concluido'?'bg-green-50':'bg-yellow-50'}">
-                    <div>
-                        <strong>${a.nome_cliente}</strong> - ${a.nome_servico}<br>
-                        <small>${a.data_agendamento} - ${a.status.toUpperCase()}</small>
-                    </div>
-                    ${a.status==='agendado' ? `<button onclick="concluir('${a.id}')" class="bg-green-600 text-white px-4 py-2 rounded">Concluir</button>` : ''}
+            const func = await fetch('/api/funcionarios').then(r => r.json());
+            document.getElementById('comissoes-func').innerHTML = func.funcionarios.map(f => 
+                `<div class="p-4 bg-blue-50 rounded">
+                    <strong>${f.nome}</strong> → R$ ${func.comissoes[f.id] || 0}
                 </div>`
             ).join('');
         }
 
-        function concluir(id) {
-            fetch(`/api/agendamentos/${id}/concluir`, {method: 'PATCH'}).then(() => carregarTudo());
+        function addServico() {
+            const body = {
+                nome: document.getElementById('novo-nome').value,
+                valor: document.getElementById('novo-valor').value,
+                comissao_percentual: document.getElementById('novo-comissao').value
+            };
+            fetch('/api/servicos', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)})
+                .then(() => { carregarTudo(); alert("Serviço adicionado!"); });
         }
+
+        document.getElementById('c-tipo').onchange = function() {
+            document.getElementById('c-token').classList.toggle('hidden', this.value !== 'gerente');
+        };
+
+        function criarConta() {
+            const body = {
+                nome: document.getElementById('c-nome').value,
+                email: document.getElementById('c-email').value,
+                senha: document.getElementById('c-senha').value,
+                tipo: document.getElementById('c-tipo').value,
+                token: document.getElementById('c-token').value
+            };
+            fetch('/api/criar-conta', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)})
+                .then(r => r.json()).then(d => alert(d.message));
+        }
+
+        // Carrega ao abrir (caso já logado)
+        if (localStorage.getItem('logado')) login();
     </script>
 </body>
 </html>
