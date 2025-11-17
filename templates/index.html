@@ -1,238 +1,762 @@
 <!DOCTYPE html>
-<html lang="pt">
+<html lang="pt-br">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SalãoApp - Demo Gerente</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>.hidden{display:none;}</style>
+    <title>Painel Gerente - SalãoApp Demo</title>
+    <style>
+        /* Estilos Gerais */
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+
+        /* Container Principal */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        /* --- Tela de Login --- */
+        #login-view {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        #login-view h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #1a237e;
+        }
+
+        /* --- Painel Principal --- */
+        #main-view {
+            display: none; /* Começa escondido */
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background-color: #1a237e; /* Azul escuro */
+            color: white;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+
+        header nav button {
+            background: none;
+            border: 1px solid #ffffff;
+            color: white;
+            padding: 8px 16px;
+            margin-left: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s ease;
+        }
+
+        header nav button:hover, header nav button.active {
+            background-color: #ffffff;
+            color: #1a237e;
+        }
+
+        main {
+            padding: 30px;
+        }
+
+        /* Seções do Painel */
+        section {
+            display: none; /* Todas as seções começam escondidas */
+            animation: fadeIn 0.5s ease;
+        }
+
+        section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Formulários --- */
+        form {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        form div {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        form label {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="datetime-local"] {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row > div {
+            flex: 1;
+        }
+
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: bold;
+        }
+
+        button.primary {
+            background-color: #28a745; /* Verde */
+            color: white;
+        }
+        button.primary:hover {
+            background-color: #218838;
+        }
+
+        button.delete {
+            background-color: #dc3545; /* Vermelho */
+            color: white;
+            font-size: 0.85rem;
+            padding: 5px 10px;
+        }
+        button.delete:hover {
+            background-color: #c82333;
+        }
+
+        button.concluir {
+            background-color: #007bff; /* Azul */
+            color: white;
+            font-size: 0.85rem;
+            padding: 5px 10px;
+        }
+        button.concluir:hover {
+            background-color: #0069d9;
+        }
+
+        /* --- Tabelas --- */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #e0e0e0;
+            padding: 12px;
+            text-align: left;
+            vertical-align: middle;
+        }
+
+        th {
+            background-color: #f1f1f1;
+            font-weight: bold;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        td:last-child {
+            text-align: right;
+            width: 180px; /* Espaço para botões */
+        }
+        
+        td:last-child button {
+            margin-left: 5px;
+        }
+
+        /* --- Relatórios --- */
+        #relatorio-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 25px;
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #555;
+            font-size: 1.1rem;
+        }
+
+        .card p {
+            font-size: 2.2rem;
+            font-weight: bold;
+            margin: 10px 0 0 0;
+        }
+        
+        .card p.faturamento { color: #007bff; } /* Azul */
+        .card p.comissoes { color: #dc3545; } /* Vermelho */
+        .card p.lucro { color: #28a745; } /* Verde */
+
+        /* --- Utilitários --- */
+        #login-error {
+            color: #dc3545;
+            text-align: center;
+            font-weight: bold;
+            display: none; /* Começa escondido */
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen">
+<body>
 
-    <!-- =========================================== -->
-    <!-- LOGIN DEMO (APENAS GERENTE) -->
-    <!-- =========================================== -->
-    <div id="login" class="flex items-center justify-center min-h-screen">
-        <div class="bg-white p-12 rounded-3xl shadow-2xl text-center max-w-md border-4 border-indigo-300">
-            <h1 class="text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600 mb-4">
-                SalãoApp
-            </h1>
-            <p class="text-xl text-gray-700 mb-8">Demo Completa • Gerente</p>
-
-            <div class="bg-gradient-to-r from-emerald-50 to-teal-50 p-8 rounded-2xl border-2 border-emerald-300">
-                <p class="text-2xl font-bold text-emerald-800 mb-4">Acesso Demo</p>
-                <p class="text-lg mb-2"><strong>E-mail:</strong> gerente@salao.com</p>
-                <p class="text-lg mb-6"><strong>Senha:</strong> demo123</p>
-                <button onclick="login()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-5 rounded-2xl text-xl font-bold hover:scale-105 transition transform">
-                    Entrar como Gerente
-                </button>
+    <div id="login-view">
+        <h2>SalãoApp - Demo Gerente</h2>
+        <form id="form-login">
+            <div>
+                <label for="login-email">Email</label>
+                <input type="email" id="login-email" value="gerente@salao.com" required>
             </div>
-
-            <p class="text-xs text-gray-500 mt-6">
-                Funcionalidades de Cliente e Funcionário estão implementadas,<br>
-                mas desativadas temporariamente neste modo demo.
-            </p>
-        </div>
+            <div>
+                <label for="login-senha">Senha</label>
+                <input type="password" id="login-senha" value="demo123" required>
+            </div>
+            <button type="submit" class="primary">Entrar</button>
+            <p id="login-error"></p>
+        </form>
     </div>
 
-    <!-- =========================================== -->
-    <!-- DASHBOARD GERENTE (ATIVO) -->
-    <!-- =========================================== -->
-    <div id="dashboard" class="hidden">
-        <nav class="bg-gradient-to-r from-indigo-600 to-purple-700 text-white p-6 shadow-2xl">
-            <div class="max-w-7xl mx-auto flex justify-between items-center">
-                <h1 class="text-4xl font-bold">SalãoApp • Gerente</h1>
-                <button onclick="location.reload()" class="bg-red-600 px-8 py-3 rounded-xl text-xl font-bold hover:bg-red-700 transition">
-                    Sair
-                </button>
-            </div>
-        </nav>
+    <div id="main-view" class="container">
+        <header>
+            <h1>Painel Gerente</h1>
+            <nav>
+                <button id="btn-nav-relatorios" class="active">Relatórios</button>
+                <button id="btn-nav-servicos">Serviços</button>
+                <button id="btn-nav-funcionarios">Funcionários</button>
+                <button id="btn-nav-agendamentos">Agendamentos</button>
+            </nav>
+        </header>
 
-        <div class="max-w-7xl mx-auto p-8 space-y-12">
-
-            <!-- RELATÓRIO FINANCEIRO -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div class="bg-white p-10 rounded-3xl shadow-2xl text-center border-4 border-green-200">
-                    <h3 class="text-2xl text-gray-600 mb-2">Faturamento Total</h3>
-                    <p id="fat" class="text-6xl font-bold text-green-600">R$ 0,00</p>
-                </div>
-                <div class="bg-white p-10 rounded-3xl shadow-2xl text-center border-4 border-orange-200">
-                    <h3 class="text-2xl text-gray-600 mb-2">Comissões Pagas</h3>
-                    <p id="com" class="text-6xl font-bold text-orange-600">R$ 0,00</p>
-                </div>
-                <div class="bg-white p-10 rounded-3xl shadow-2xl text-center border-4 border-blue-200">
-                    <h3 class="text-2xl text-gray-600 mb-2">Lucro Líquido</h3>
-                    <p id="luc" class="text-6xl font-bold text-blue-600">R$ 0,00</p>
-                </div>
-            </div>
-
-            <div class="grid lg:grid-cols-2 gap-10">
-
-                <!-- ADICIONAR SERVIÇO -->
-                <div class="bg-white p-8 rounded-3xl shadow-2xl border-4 border-indigo-200">
-                    <h2 class="text-3xl font-bold text-indigo-700 mb-6">Adicionar Serviço</h2>
-                    <div class="grid grid-cols-3 gap-4 mb-6">
-                        <input id="s-nome" placeholder="Nome do serviço" class="p-4 border-2 rounded-xl text-center">
-                        <input id="s-valor" type="number" placeholder="Valor R$" class="p-4 border-2 rounded-xl text-center">
-                        <input id="s-comissao" type="number" placeholder="Comissão %" class="p-4 border-2 rounded-xl text-center">
+        <main>
+            <section id="view-relatorios" class="active">
+                <h2>Relatório Financeiro</h2>
+                <div id="relatorio-cards">
+                    <div class="card">
+                        <h3>Faturamento Total (Concluído)</h3>
+                        <p id="faturamento-total" class="faturamento">R$ 0,00</p>
                     </div>
-                    <button onclick="addServico()" class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 text-white py-5 rounded-2xl text-xl font-bold hover:scale-105 transition">
-                        Adicionar Serviço
-                    </button>
-                    <div id="lista-servicos" class="mt-8 space-y-4"></div>
+                    <div class="card">
+                        <h3>Comissões Pagas (Concluído)</h3>
+                        <p id="comissoes-total" class="comissoes">R$ 0,00</p>
+                    </div>
+                    <div class="card">
+                        <h3>Lucro Bruto</h3>
+                        <p id="lucro-total" class="lucro">R$ 0,00</p>
+                    </div>
                 </div>
+            </section>
 
-                <!-- COMISSÃO DOS FUNCIONÁRIOS -->
-                <div class="bg-white p-8 rounded-3xl shadow-2xl border-4 border-blue-200">
-                    <h2 class="text-3xl font-bold text-blue-700 mb-6">Comissão por Funcionário</h2>
-                    <div id="lista-funcionarios" class="space-y-5 text-xl"></div>
-                </div>
+            <section id="view-servicos">
+                <h2>Gerenciar Serviços</h2>
+                <form id="form-add-servico">
+                    <h3>Adicionar Novo Serviço</h3>
+                    <div class="form-row">
+                        <div>
+                            <label for="servico-nome">Nome do Serviço</label>
+                            <input type="text" id="servico-nome" required>
+                        </div>
+                        <div>
+                            <label for="servico-valor">Valor (R$)</label>
+                            <input type="number" id="servico-valor" step="0.01" min="0" required>
+                        </div>
+                        <div>
+                            <label for="servico-comissao">Comissão (%)</label>
+                            <input type="number" id="servico-comissao" step="1" min="0" max="100" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="primary" style="align-self: flex-start;">Adicionar Serviço</button>
+                </form>
 
-                <!-- AGENDA COMPLETA -->
-                <div class="bg-white p-10 rounded-3xl shadow-2xl border-4 border-purple-200 lg:col-span-2">
-                    <h2 class="text-4xl font-bold text-purple-700 mb-8 text-center">Agenda Completa</h2>
-                    <div id="lista-agenda" class="space-y-6"></div>
-                </div>
+                <h3>Serviços Cadastrados</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nome</th>
+                            <th>Valor</th>
+                            <th>Comissão</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-servicos">
+                        </tbody>
+                </table>
+            </section>
 
-                <!-- CRIAR NOVA CONTA -->
-                <div class="bg-white p-8 rounded-3xl shadow-2xl border-4 border-green-200">
-                    <h2 class="text-3xl font-bold text-green-700 mb-6">Criar Nova Conta</h2>
-                    <input id="c-nome" placeholder="Nome completo" class="w-full p-4 border-2 rounded-xl mb-4">
-                    <input id="c-email" placeholder="E-mail" class="w-full p-4 border-2 rounded-xl mb-4">
-                    <input id="c-senha" placeholder="Senha" class="w-full p-4 border-2 rounded-xl mb-4">
-                    <select id="c-tipo" onchange="this.value==='gerente'?document.getElementById('c-token').classList.remove('hidden'):document.getElementById('c-token').classList.add('hidden')" class="w-full p-4 border-2 rounded-xl mb-4 text-lg">
-                        <option value="funcionario">Funcionário</option>
-                        <option value="gerente">Gerente (precisa token)</option>
-                    </select>
-                    <input id="c-token" placeholder="Token: leonardo123" class="w-full p-4 border-2 rounded-xl mb-6 hidden">
-                    <button onclick="criarConta()" class="w-full bg-gradient-to-r from-green-600 to-emerald-600 text-white py-5 rounded-2xl text-xl font-bold hover:scale-105 transition">
-                        Criar Conta
-                    </button>
-                </div>
+            <section id="view-funcionarios">
+                <h2>Gerenciar Funcionários</h2>
+                <form id="form-add-funcionario">
+                    <h3>Adicionar Novo Funcionário</h3>
+                    <div class="form-row">
+                        <div>
+                            <label for="func-nome">Nome Completo</label>
+                            <input type="text" id="func-nome" required>
+                        </div>
+                        <div>
+                            <label for="func-email">Email (para login)</label>
+                            <input type="email" id="func-email" required>
+                        </div>
+                        <div>
+                            <label for="func-senha">Senha Provisória</label>
+                            <input type="password" id="func-senha" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="primary" style="align-self: flex-start;">Adicionar Funcionário</button>
+                </form>
 
-            </div>
-        </div>
+                <h3>Funcionários Cadastrados</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Comissão a Pagar (Concluído)</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-funcionarios">
+                        </tbody>
+                </table>
+            </section>
+
+            <section id="view-agendamentos">
+                <h2>Gerenciar Agendamentos</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Serviço</th>
+                            <th>Data/Hora</th>
+                            <th>Funcionário ID</th>
+                            <th>Valor</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabela-agendamentos">
+                        </tbody>
+                </table>
+            </section>
+
+        </main>
     </div>
-
-    <!-- ==================================================== -->
-    <!-- ÁREAS COMENTADAS (CLIENTE E FUNCIONÁRIO) -->
-    <!-- ==================================================== -->
-    <!--
-        =============================================
-        ÁREA DO CLIENTE (DESATIVADA TEMPORARIAMENTE)
-        =============================================
-        <div id="area-cliente" class="hidden">
-            <h1 class="text-4xl font-bold">Marcar Horário</h1>
-            ... todo o sistema completo de seleção de serviço, data, hora ...
-        </div>
-
-        =============================================
-        ÁREA DO FUNCIONÁRIO (DESATIVADA TEMPORARIAMENTE)
-        =============================================
-        <div id="area-funcionario" class="hidden">
-            <h1 class="text-4xl font-bold">Portal do Funcionário</h1>
-            ... comissão, agenda própria, atendimentos ...
-        </div>
-
-        Todas essas funcionalidades estão 100% implementadas e testadas.
-        Foram apenas comentadas para manter o demo limpo e focado no painel administrativo.
-    -->
 
     <script>
-        function login(){
-            fetch('/api/login',{
-                method:'POST',
-                headers:{'Content-Type':'application/json'},
-                body:JSON.stringify({email:'gerente@salao.com',senha:'demo123'})
-            }).then(r=>r.json()).then(d=>{
-                if(d.success){
-                    document.getElementById('login').classList.add('hidden')
-                    document.getElementById('dashboard').classList.remove('hidden')
-                    carregarTudo()
+        // Adiciona funções ao escopo global para que os botões 'onclick' possam chamá-las
+        window.excluirServico = excluirServico;
+        window.excluirFuncionario = excluirFuncionario;
+        window.concluirAgendamento = concluirAgendamento;
+        window.excluirAgendamento = excluirAgendamento;
+
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // === SELETORES DE ELEMENTOS ===
+            const loginView = document.getElementById('login-view');
+            const mainView = document.getElementById('main-view');
+            const formLogin = document.getElementById('form-login');
+            const loginError = document.getElementById('login-error');
+
+            const navButtons = {
+                relatorios: document.getElementById('btn-nav-relatorios'),
+                servicos: document.getElementById('btn-nav-servicos'),
+                funcionarios: document.getElementById('btn-nav-funcionarios'),
+                agendamentos: document.getElementById('btn-nav-agendamentos'),
+            };
+
+            const views = {
+                relatorios: document.getElementById('view-relatorios'),
+                servicos: document.getElementById('view-servicos'),
+                funcionarios: document.getElementById('view-funcionarios'),
+                agendamentos: document.getElementById('view-agendamentos'),
+            };
+
+            // Seletores de Formulários
+            const formAddServico = document.getElementById('form-add-servico');
+            const formAddFuncionario = document.getElementById('form-add-funcionario');
+            
+            // Seletores de Tabelas (tbody)
+            const tabelaServicos = document.getElementById('tabela-servicos');
+            const tabelaFuncionarios = document.getElementById('tabela-funcionarios');
+            const tabelaAgendamentos = document.getElementById('tabela-agendamentos');
+            
+            // Seletores de Relatório
+            const faturamentoTotal = document.getElementById('faturamento-total');
+            const comissoesTotal = document.getElementById('comissoes-total');
+            const lucroTotal = document.getElementById('lucro-total');
+
+            // === LÓGICA DE NAVEGAÇÃO ===
+            function mostrarView(viewId) {
+                // Esconde todas as seções
+                Object.values(views).forEach(view => view.classList.remove('active'));
+                // Desativa todos os botões
+                Object.values(navButtons).forEach(btn => btn.classList.remove('active'));
+
+                // Mostra a seção e ativa o botão correspondente
+                if (views[viewId] && navButtons[viewId]) {
+                    views[viewId].classList.add('active');
+                    navButtons[viewId].classList.add('active');
                 }
-            })
-        }
-
-        async function carregarTudo(){
-            const rel = await fetch('/api/relatorio').then(r=>r.json())
-            document.getElementById('fat').innerText = `R$ ${rel.faturamento}`
-            document.getElementById('com').innerText = `R$ ${rel.comissoes}`
-            document.getElementById('luc').innerText = `R$ ${rel.lucro}`
-
-            const serv = await fetch('/api/servicos').then(r=>r.json())
-            document.getElementById('lista-servicos').innerHTML = Object.entries(serv).map(([id,s])=>`
-                <div class="flex justify-between items-center p-6 bg-indigo-50 rounded-2xl">
-                    <div><strong class="text-xl">${s.nome}</strong><br>R$ ${s.valor} • Comissão ${s.comissao_percentual}%</div>
-                    <button onclick="fetch('/api/servicos/${id}',{method:'DELETE'}).then(carregarTudo)" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700">Excluir</button>
-                </div>`).join('')
-
-            const func = await fetch('/api/funcionarios').then(r=>r.json())
-            document.getElementById('lista-funcionarios').innerHTML = func.funcionarios.map(f=>`
-                <div class="flex justify-between items-center p-6 bg-blue-50 rounded-2xl">
-                    <div><strong class="text-2xl">${f.nome}</strong><br><span class="text-green-600 text-3xl font-bold">R$ ${func.comissoes[f.id]||0}</span></div>
-                    <button onclick="if(confirm('Excluir ${f.nome}?'))fetch('/api/funcionarios/${f.id}',{method:'DELETE'}).then(carregarTudo)" class="bg-red-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-red-700">Excluir</button>
-                </div>`).join('')
-
-            const agend = await fetch('/api/agendamentos').then(r=>r.json())
-            document.getElementById('lista-agenda').innerHTML = Object.values(agend).map(a=>`
-                <div class="p-8 rounded-3xl border-4 ${a.status==='concluido'?'bg-green-50 border-green-300':'bg-yellow-50 border-yellow-300'}">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <strong class="text-2xl">${a.nome_cliente}</strong> → ${a.nome_servico}<br>
-                            <span class="text-lg text-gray-700">${a.data_hora}</span> • 
-                            Atendido por: <strong>${usuarios[Object.keys(usuarios).find(e=>usuarios[e].id===a.funcionario_id)]?.nome || '—'}</strong>
-                        </div>
-                        <div class="space-x-4">
-                            ${a.status==='agendado'?`<button onclick="fetch('/api/agendamentos/${a.id}/concluir',{method:'PATCH'}).then(carregarTudo)" class="bg-green-600 text-white px-8 py-4 rounded-xl text-xl font-bold hover:bg-green-700">Concluir</button>`:''}
-                            <button onclick="if(confirm('Excluir agendamento?'))fetch('/api/agendamentos/${a.id}',{method:'DELETE'}).then(carregarTudo)" class="bg-red-600 text-white px-8 py-4 rounded-xl text-xl font-bold hover:bg-red-700">Excluir</button>
-                        </div>
-                    </div>
-                </div>`).join('')
-        }
-
-        function addServico(){
-            const body = {
-                nome: document.getElementById('s-nome').value,
-                valor: document.getElementById('s-valor').value,
-                comissao_percentual: document.getElementById('s-comissao').value
             }
-            fetch('/api/servicos',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-                .then(()=> { carregarTudo(); alert('Serviço adicionado com sucesso!') })
-        }
 
-        function criarConta(){
-            const body = {
-                nome: document.getElementById('c-nome').value,
-                email: document.getElementById('c-email').value,
-                senha: document.getElementById('c-senha').value,
-                tipo: document.getElementById('c-tipo').value,
-                token: document.getElementById('c-token').value
+            // Event Listeners da Navegação
+            navButtons.relatorios.addEventListener('click', () => {
+                carregarRelatorio();
+                mostrarView('relatorios');
+            });
+            navButtons.servicos.addEventListener('click', () => {
+                carregarServicos();
+                mostrarView('servicos');
+            });
+            navButtons.funcionarios.addEventListener('click', () => {
+                carregarFuncionarios();
+                mostrarView('funcionarios');
+            });
+            navButtons.agendamentos.addEventListener('click', () => {
+                carregarAgendamentos();
+                mostrarView('agendamentos');
+            });
+
+            // === LÓGICA DE LOGIN ===
+            formLogin.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                loginError.style.display = 'none';
+
+                const email = document.getElementById('login-email').value;
+                const senha = document.getElementById('login-senha').value;
+
+                try {
+                    const response = await fetch('/api/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, senha })
+                    });
+                    
+                    const data = await response.json();
+
+                    if (data.success) {
+                        // Sucesso! Esconde login, mostra painel e carrega dados
+                        loginView.style.display = 'none';
+                        mainView.style.display = 'block';
+                        // Carrega a view padrão (Relatórios)
+                        carregarRelatorio();
+                        mostrarView('relatorios');
+                    } else {
+                        loginError.textContent = data.message || "Erro desconhecido.";
+                        loginError.style.display = 'block';
+                    }
+                } catch (error) {
+                    loginError.textContent = "Falha ao conectar com o servidor.";
+                    loginError.style.display = 'block';
+                }
+            });
+
+            // === CARREGAR DADOS (API CALLS) ===
+
+            // 1. Relatórios
+            async function carregarRelatorio() {
+                try {
+                    const response = await fetch('/api/relatorio');
+                    const data = await response.json();
+                    
+                    faturamentoTotal.textContent = `R$ ${data.faturamento}`;
+                    comissoesTotal.textContent = `R$ ${data.comissoes}`;
+                    lucroTotal.textContent = `R$ ${data.lucro}`;
+
+                } catch (error) {
+                    console.error("Erro ao carregar relatório:", error);
+                }
             }
-            fetch('/api/criar-conta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
-                .then(r=>r.json()).then(d=>alert(d.success?'Conta criada com sucesso!':'Erro: '+d.message))
+
+            // 2. Serviços
+            async function carregarServicos() {
+                try {
+                    const response = await fetch('/api/servicos');
+                    // O backend retorna um OBJETO, não um array
+                    const servicos = await response.json(); 
+                    
+                    tabelaServicos.innerHTML = ''; // Limpa a tabela
+                    
+                    // Itera sobre as chaves do objeto (que são os IDs)
+                    for (const id in servicos) {
+                        const s = servicos[id];
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${s.nome}</td>
+                            <td>R$ ${s.valor.toFixed(2)}</td>
+                            <td>${s.comissao_percentual}%</td>
+                            <td>
+                                <button class="delete" onclick="excluirServico('${id}')">Excluir</button>
+                            </td>
+                        `;
+                        tabelaServicos.appendChild(tr);
+                    }
+                } catch (error) {
+                    console.error("Erro ao carregar serviços:", error);
+                }
+            }
+
+            // 3. Funcionários
+            async function carregarFuncionarios() {
+                try {
+                    const response = await fetch('/api/funcionarios');
+                    // O backend retorna um objeto com duas chaves
+                    const data = await response.json();
+                    const funcionarios = data.funcionarios; // Array
+                    const comissoes = data.comissoes; // Objeto { "id": "valor_str" }
+                    
+                    tabelaFuncionarios.innerHTML = ''; // Limpa a tabela
+
+                    funcionarios.forEach(f => {
+                        // Busca a comissão no objeto de comissões, ou usa "0.00"
+                        const comissaoValor = comissoes[f.id] || "0.00";
+                        
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${f.id}</td>
+                            <td>${f.nome}</td>
+                            <td>${f.tipo_conta}</td>
+                            <td>R$ ${comissaoValor}</td>
+                            <td>
+                                <button class="delete" onclick="excluirFuncionario(${f.id})">Excluir</button>
+                            </td>
+                        `;
+                        tabelaFuncionarios.appendChild(tr);
+                    });
+                } catch (error) {
+                    console.error("Erro ao carregar funcionários:", error);
+                }
+            }
+            
+            // 4. Agendamentos
+            async function carregarAgendamentos() {
+                try {
+                    const response = await fetch('/api/agendamentos');
+                    // O backend retorna um OBJETO
+                    const agendamentos = await response.json(); 
+                    
+                    tabelaAgendamentos.innerHTML = ''; // Limpa a tabela
+
+                    for (const id in agendamentos) {
+                        const a = agendamentos[id];
+
+                        let botoesAcao = `
+                            <button class="delete" onclick="excluirAgendamento('${id}')">Excluir</button>
+                        `;
+
+                        // Só mostra o botão "Concluir" se o status não for 'concluido'
+                        if (a.status !== 'concluido') {
+                            botoesAcao = `
+                                <button class="concluir" onclick="concluirAgendamento('${id}')">Concluir</button>
+                                ${botoesAcao}
+                            `;
+                        }
+
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${a.nome_cliente}</td>
+                            <td>${a.nome_servico}</td>
+                            <td>${new Date(a.data_hora).toLocaleString('pt-BR')}</td>
+                            <td>${a.funcionario_id}</td>
+                            <td>R$ ${a.valor.toFixed(2)}</td>
+                            <td>${a.status}</td>
+                            <td>
+                                ${botoesAcao}
+                            </td>
+                        `;
+                        tabelaAgendamentos.appendChild(tr);
+                    }
+                } catch (error) {
+                    console.error("Erro ao carregar agendamentos:", error);
+                }
+            }
+            
+            // === AÇÕES (Adicionar / Excluir / Concluir) ===
+
+            // ADICIONAR SERVIÇO (Formulário)
+            formAddServico.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nome = document.getElementById('servico-nome').value;
+                const valor = document.getElementById('servico-valor').value;
+                const comissao_percentual = document.getElementById('servico-comissao').value;
+
+                try {
+                    const response = await fetch('/api/servicos', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nome, valor, comissao_percentual })
+                    });
+                    
+                    if(response.ok) {
+                        formAddServico.reset(); // Limpa o formulário
+                        carregarServicos(); // Atualiza a tabela
+                    } else {
+                        alert("Erro ao adicionar serviço.");
+                    }
+                } catch (error) {
+                    console.error("Erro ao adicionar serviço:", error);
+                }
+            });
+
+            // ADICIONAR FUNCIONÁRIO (Formulário)
+            formAddFuncionario.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const nome = document.getElementById('func-nome').value;
+                const email = document.getElementById('func-email').value;
+                const senha = document.getElementById('func-senha').value;
+                
+                // O token não é necessário para criar 'funcionario' (conforme API)
+                const payload = {
+                    nome: nome,
+                    email: email,
+                    senha: senha,
+                    tipo: "funcionario",
+                    token: "" // Token de gerente não é necessário aqui
+                };
+
+                try {
+                    const response = await fetch('/api/criar-conta', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const data = await response.json();
+
+                    if(response.ok) {
+                        formAddFuncionario.reset(); // Limpa o formulário
+                        carregarFuncionarios(); // Atualiza a tabela
+                        alert(data.message);
+                    } else {
+                        alert(`Erro: ${data.message}`);
+                    }
+                } catch (error) {
+                    console.error("Erro ao criar conta:", error);
+                }
+            });
+
+        }); // Fim do DOMContentLoaded
+
+        // === FUNÇÕES GLOBAIS (para botões onclick) ===
+        
+        // EXCLUIR SERVIÇO
+        async function excluirServico(id) {
+            if (!confirm(`Tem certeza que deseja excluir o serviço ID ${id}?`)) return;
+
+            try {
+                const response = await fetch(`/api/servicos/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    // Recarrega a view de serviços (carregarServicos é definido no escopo acima)
+                    document.getElementById('btn-nav-servicos').click();
+                } else {
+                    alert("Erro ao excluir serviço.");
+                }
+            } catch (error) {
+                console.error("Erro ao excluir serviço:", error);
+            }
         }
 
-        // Variável global para o JS poder pegar o nome do funcionário
-        const usuarios = {
-            "gerente@salao.com": {nome: "Leonardo Almeida"},
-            "maria@salao.com": {nome: "Maria Silva"},
-            "joao@salao.com": {nome: "João Costa"}
+        // EXCLUIR FUNCIONÁRIO
+        async function excluirFuncionario(id) {
+            if (!confirm(`Tem certeza que deseja excluir o funcionário ID ${id}?`)) return;
+
+            try {
+                const response = await fetch(`/api/funcionarios/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    document.getElementById('btn-nav-funcionarios').click();
+                } else {
+                    alert("Erro ao excluir funcionário.");
+                }
+            } catch (error) {
+                console.error("Erro ao excluir funcionário:", error);
+            }
         }
+
+        // CONCLUIR AGENDAMENTO
+        async function concluirAgendamento(id) {
+            try {
+                const response = await fetch(`/api/agendamentos/${id}/concluir`, {
+                    method: 'PATCH'
+                });
+                if (response.ok) {
+                    document.getElementById('btn-nav-agendamentos').click();
+                } else {
+                    alert("Erro ao concluir agendamento.");
+                }
+            } catch (error) {
+                console.error("Erro ao concluir agendamento:", error);
+            }
+        }
+
+        // EXCLUIR AGENDAMENTO
+        async function excluirAgendamento(id) {
+            if (!confirm(`Tem certeza que deseja excluir o agendamento ID ${id}?`)) return;
+
+            try {
+                const response = await fetch(`/api/agendamentos/${id}`, {
+                    method: 'DELETE'
+                });
+                if (response.ok) {
+                    document.getElementById('btn-nav-agendamentos').click();
+                } else {
+                    alert("Erro ao excluir agendamento.");
+                }
+            } catch (error) {
+                console.error("Erro ao excluir agendamento:", error);
+            }
+        }
+
     </script>
-
-    <!--
-        =====================================================
-        TODAS AS FUNÇÕES ANTIGAS ESTÃO IMPLEMENTADAS
-        =====================================================
-        - Cadastro de cliente (público)
-        - Marcação de horário pelo cliente
-        - Painel do funcionário com comissão
-        - Login múltiplo (cliente/funcionário/gerente)
-        - Recuperação de senha
-        - Tudo 100% funcional e testado
-
-        Desativadas temporariamente apenas para manter o demo limpo
-        e focado no painel administrativo durante apresentações.
-    -->
 </body>
 </html>
