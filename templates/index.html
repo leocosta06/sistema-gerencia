@@ -48,8 +48,12 @@
             <div id="form-cadastro" class="hidden space-y-4">
                 <input type="text" id="cad-nome" placeholder="Nome Completo" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <input type="email" id="cad-email" placeholder="E-mail" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                <input type="password" id="cad-senha" placeholder="Senha (Mín. 8, 1 Nº, 1 Maiúscula)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
-                <input type="text" id="cad-telefone" placeholder="Telefone (opcional)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <input type="password" id="cad-senha" placeholder="Senha (mín. 6 caracteres)" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                <select id="cad-tipo" class="block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                    <option value="funcionario">Funcionário</option>
+                    <option value="gerente">Gerente (precisa de token)</option>
+                </select>
+                <input type="text" id="cad-token" placeholder="Token do gerente (só para gerente)" class="hidden block w-full px-4 py-3 border rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white">
                 <button onclick="fazerCadastro()" class="w-full py-3 rounded-lg text-white font-bold bg-green-600 hover:bg-green-700">Registar</button>
                 <button onclick="toggleForms()" class="w-full py-3 rounded-lg text-gray-700 font-medium bg-gray-100 dark:bg-gray-700">Voltar</button>
             </div>
@@ -124,18 +128,6 @@
                     <div id="lista-servicos-gerente" class="space-y-2"></div>
                 </div>
 
-                <!-- Clientes -->
-                <div id="clientes" class="tab-content hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
-                    <select id="select-cliente-freq" class="w-full border rounded-lg p-2.5 mb-4 dark:bg-gray-700 dark:text-white"></select>
-                    <div id="info-frequencia" class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"></div>
-                </div>
-
-                <!-- Funcionários -->
-                <div id="funcionarios" class="tab-content hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
-                    <select id="select-func-comissao" class="w-full border rounded-lg p-2.5 mb-4 dark:bg-gray-700 dark:text-white"></select>
-                    <div id="info-comissao" class="text-center p-4 bg-gray-50 dark:bg-gray-700 rounded-lg"></div>
-                </div>
-
                 <!-- Contas -->
                 <div id="gerenciar-contas" class="tab-content hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
                     <h3 class="text-lg font-bold mb-4 dark:text-white">Criar Conta</h3>
@@ -153,63 +145,15 @@
                 </div>
             </div>
 
-            <!-- CLIENTE -->
+            <!-- CLIENTE / FUNCIONÁRIO (simulados) -->
             <div id="area-cliente" class="hidden space-y-6">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Marcar Horário</h1>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium mb-2 dark:text-gray-300">1. Serviço</label>
-                            <select id="cli-servico" class="w-full border rounded-lg p-2.5 dark:bg-gray-700 dark:text-white" onchange="carregarDatasDisponiveis()">
-                                <option value="">Selecione</option>
-                            </select>
-                        </div>
-                        <div id="bloco-data" class="hidden">
-                            <label class="block text-sm font-medium mb-2 dark:text-gray-300">2. Dia</label>
-                            <input type="date" id="cli-data" class="w-full border rounded-lg p-2 dark:bg-gray-700 dark:text-white" onchange="carregarHorariosDisponiveis()">
-                        </div>
-                        <div id="bloco-hora" class="hidden">
-                            <label class="block text-sm font-medium mb-2 dark:text-gray-300">3. Horário</label>
-                            <select id="cli-hora" class="w-full border rounded-lg p-2.5 dark:bg-gray-700 dark:text-white" onchange="carregarFuncionariosLivres()">
-                                <option value="">Selecione</option>
-                            </select>
-                        </div>
-                        <div id="bloco-funcionario" class="hidden">
-                            <label class="block text-sm font-medium mb-2 dark:text-gray-300">4. Profissional</label>
-                            <select id="cli-funcionario" class="w-full border rounded-lg p-2.5 presidente dark:bg-gray-700 dark:text-white">
-                                <option value="">Selecione</option>
-                            </select>
-                            <button onclick="marcarAgendamento()" class="mt-4 w-full bg-blue-600 text-white p-3 rounded-lg font-bold hover:bg-blue-700">Confirmar</button>
-                        </div>
-                    </div>
-                </div>
-                <div class="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
-                    <h3 class="text-lg font-bold mb-4 dark:text-white">Meus Agendamentos</h3>
-                    <div id="meus-agendamentos-lista" class="space-y-3"></div>
-                </div>
+                <p class="text-center text-gray-500">Funcionalidade em desenvolvimento.</p>
             </div>
 
-            <!-- FUNCIONÁRIO -->
             <div id="area-funcionario" class="hidden space-y-6">
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Portal do Funcionário</h1>
-                <div class="border-b border-gray-200 dark:border-gray-700">
-                    <nav class="-mb-px flex space-x-6">
-                        <button class="tab-button-func active" onclick="abrirAbaFunc(event, 'func-agenda')">Agenda</button>
-                        <button class="tab-button-func" onclick="abrirAbaFunc(event, 'func-ganhos')">Ganhos</button>
-                    </nav>
-                </div>
-                <div id="func-agenda" class="tab-content-func bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
-                    <h3 class="text-lg font-bold mb-4 dark:text-white">Próximos Clientes</h3>
-                    <div id="lista-agendamentos-func-pendentes" class="space-y-2"></div>
-                </div>
-                <div id="func-ganhos" class="tab-content-func hidden bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm border dark:border-gray-700">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Comissão</p><p id="func-comissao" class="text-2xl font-bold text-green-600">R$ 0.00</p></div>
-                        <div><p class="text-sm text-gray-500 dark:text-gray-400">Atendimentos</p><p id="func-atendimentos" class="text-2xl font-bold text-blue-600">0</p></div>
-                    </div>
-                    <h3 class="text-lg font-bold mt-6 mb-4 dark:text-white">Histórico</h3>
-                    <div id="lista-agendamentos-func-concluidos" class="space-y-2"></div>
-                </div>
+                <p class="text-center text-gray-500">Funcionalidade em desenvolvimento.</p>
             </div>
         </main>
     </div>
@@ -217,7 +161,6 @@
     <!-- JAVASCRIPT -->
     <script>
         let currentUser = null;
-        let servicoSelecionado = null, dataSelecionada = null, horaSelecionada = null;
         let gerenteToken = null;
 
         lucide.createIcons();
@@ -233,7 +176,11 @@
         function toggleForms() {
             document.getElementById('form-login').classList.toggle('hidden');
             document.getElementById('form-cadastro').classList.toggle('hidden');
+            const tipo = document.getElementById('cad-tipo').value;
+            document.getElementById('cad-token').classList.toggle('hidden', tipo !== 'gerente');
         }
+
+        document.getElementById('cad-tipo').addEventListener('change', toggleForms);
 
         function mostrarRecuperacao() {
             document.getElementById('form-login').classList.add('hidden');
@@ -273,18 +220,35 @@
             const nome = document.getElementById('cad-nome').value.trim();
             const email = document.getElementById('cad-email').value.trim();
             const senha = document.getElementById('cad-senha').value;
+            const tipo_conta = document.getElementById('cad-tipo').value;
+            const token_gerente = tipo_conta === 'gerente' ? document.getElementById('cad-token').value : null;
 
             if (!nome || !email || !senha) return mostrarToast("Preencha tudo.", "erro");
-            if (senha.length < 8 || !/\d/.test(senha) || !/[A-Z]/.test(senha)) return mostrarToast("Senha inválida.", "erro");
+            if (senha.length < 6) return mostrarToast("Senha deve ter 6+ caracteres.", "erro");
 
-            mostrarToast("Cadastro desativado na demo.", "erro");
+            const body = { nome, email, senha, tipo_conta };
+            if (tipo_conta === 'gerente') body.token_gerente = token_gerente;
+
+            const res = await fetch('/api/cadastrar', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            const data = await res.json();
+
+            mostrarToast(data.message, data.success ? "sucesso" : "erro");
+            if (data.success) {
+                currentUser = data.user;
+                localStorage.setItem('salaoUser', JSON.stringify(data.user));
+                showDashboard();
+            }
         }
 
         async function solicitarRecuperacao() {
             const email = document.getElementById('rec-email').value.trim();
             if (!email) return mostrarToast("Digite o e-mail.", "erro");
 
-            const res =  await fetch('/api/recuperar-senha', {
+            const res = await fetch('/api/recuperar-senha', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email })
@@ -297,7 +261,7 @@
         function redefinirSenha() {
             const s1 = document.getElementById('nova-senha1').value;
             const s2 = document.getElementById('nova-senha2').value;
-            if (s1 !== s2 || s1.length < 8) return mostrarToast("Senhas não batem ou curta.", "erro");
+            if (s1 !== s2 || s1.length < 6) return mostrarToast("Senhas não batem ou curta.", "erro");
 
             fetch('/api/redefinir-senha', {
                 method: 'POST',
@@ -325,145 +289,62 @@
             if (currentUser.tipo_conta === 'gerente') {
                 document.getElementById('area-gerente').classList.remove('hidden');
                 carregarDadosGerente();
-            } else if (currentUser.tipo_conta === 'cliente') {
-                document.getElementById('area-cliente').classList.remove('hidden');
-                carregarListasAgendamento();
-                carregarMeusAgendamentos();
             } else if (currentUser.tipo_conta === 'funcionario') {
                 document.getElementById('area-funcionario').classList.remove('hidden');
-                carregarAgendaFuncionario();
-                carregarGanhosFuncionario();
+            } else {
+                document.getElementById('area-cliente').classList.remove('hidden');
             }
         }
 
-        // === GERENTE ===
         async function carregarDadosGerente() {
-            if (!gerenteToken) {
-                gerenteToken = prompt("Token do gerente:");
-                if (!gerenteToken) return mostrarToast("Token necessário.", "erro");
-            }
-
-            const headers = { 'Content-Type': 'application/json', 'Authorization': `Bearer ${gerenteToken}` };
-            const [agendRes, servRes, funcsRes, contasRes] = await Promise.all([
-                fetch('/api/agendamentos'), fetch('/api/servicos'),
-                fetch('/api/contas/funcionarios'), fetch('/api/contas/todos', { headers })
+            const [agendRes, servRes, contasRes] = await Promise.all([
+                fetch('/api/agendamentos'),
+                fetch('/api/servicos'),
+                fetch('/api/contas/todos')
             ]);
 
             const agendamentos = await agendRes.json();
             const servicos = await servRes.json();
-            const funcs = await funcsRes.json();
             const contas = await contasRes.json();
 
-            // Agenda
+            // Lista agendamentos
             const lista = document.getElementById('lista-agendamentos-gerente');
-            lista.innerHTML = '';
+            lista.innerHTML = Object.keys(agendamentos).length ? '' : '<p class="text-gray-500">Nenhum agendamento.</p>';
             for (let id in agendamentos) {
                 const a = agendamentos[id];
                 if (a.status === 'agendado') {
-                    lista.innerHTML += `<div class="flex justify-between items-center p-2 border-b dark:border-gray-700">
-                        <div><p class="font-medium">${a.nome_cliente} - ${a.nome_servico}</p><p class="text-sm text-gray-500">${a.data_agendamento.slice(0,16).replace(' ', ' às ')}</p></div>
-                        <button onclick="concluirAgendamento('${id}')" class="text-green-600 hover:text-green-800 text-sm font-bold">Concluir</button>
+                    lista.innerHTML += `<div class="flex justify-between p-2 border-b dark:border-gray-700">
+                        <div><p class="font-medium">${a.nome_cliente}</p><p class="text-sm text-gray-500">${a.data_agendamento}</p></div>
+                        <button class="text-green-600 text-sm">Concluir</button>
                     </div>`;
                 }
             }
 
-            // Serviços
+            // Lista serviços
             const listaServ = document.getElementById('lista-servicos-gerente');
             listaServ.innerHTML = '';
             for (let id in servicos) {
                 const s = servicos[id];
-                listaServ.innerHTML += `<div class="flex justify-between items-center p-2 border-b dark:border-gray-700">
-                    <div><p class="font-medium">${s.nome} - R$ ${s.valor}</p><p class="text-sm text-gray-500">Comissão: ${s.comissao_percentual}%</p></div>
-                    <button onclick="apagarServico('${id}')" class="text-red-600 hover:text-red-800 text-sm">Apagar</button>
+                listaServ.innerHTML += `<div class="flex justify-between p-2 border-b dark:border-gray-700">
+                    <div><p class="font-medium">${s.nome} - R$ ${s.valor}</p><p class="text-sm">Comissão: ${s.comissao_percentual}%</p></div>
                 </div>`;
             }
 
-            // Contas
+            // Lista contas
             const div = document.getElementById('lista-contas-gerente');
             div.innerHTML = '';
-            for (let id in contas) {
-                const c = contas[id];
+            for (let email in contas) {
+                const c = contas[email];
                 if (['funcionario', 'gerente'].includes(c.tipo_conta)) {
-                    div.innerHTML += `<div class="flex justify-between items-center border-b p-2 dark:border-gray-700">
-                        <div><p class="font-medium dark:text-white">${c.nome} (${c.email})</p><p class="text-sm text-gray-500 dark:text-gray-400">${c.tipo_conta}</p></div>
-                        <button onclick="apagarConta('${id}')" class="text-red-600 hover:text-red-800 text-sm font-bold">Apagar</button>
+                    div.innerHTML += `<div class="flex justify-between p-2 border-b dark:border-gray-700">
+                        <div><p class="font-medium">${c.nome} (${email})</p><p class="text-sm">${c.tipo_conta}</p></div>
                     </div>`;
                 }
             }
         }
 
-        function adicionarServico() { mostrarToast("Funcionalidade demo.", "erro"); }
-        function apagarServico(id) { mostrarToast("Demo.", "erro"); }
-        function concluirAgendamento(id) { mostrarToast("Concluído!", "sucesso"); }
-        function criarContaAdmin() { mostrarToast("Demo.", "erro"); }
-        function apagarConta(id) { mostrarToast("Demo.", "erro"); }
+        function criarContaAdmin() { mostrarToast("Use o formulário de cadastro na tela de login.", "erro"); }
 
-        // === CLIENTE ===
-        async function carregarListasAgendamento() {
-            const res = await fetch('/api/servicos');
-            const servicos = await res.json();
-            const sel = document.getElementById('cli-servico');
-            sel.innerHTML = '<option value="">Selecione um serviço</option>';
-            for (let id in servicos) {
-                sel.innerHTML += `<option value="${id}">${servicos[id].nome} (R$ ${servicos[id].valor})</option>`;
-            }
-        }
-
-        function carregarDatasDisponiveis() {
-            const servicoId = document.getElementById('cli-servico').value;
-            if (!servicoId) return document.getElementById('bloco-data').classList.add('hidden');
-            servicoSelecionado = servicoId;
-            document.getElementById('bloco-data').classList.remove('hidden');
-            const hoje = new Date().toISOString().split('T')[0];
-            document.getElementById('cli-data').min = hoje;
-        }
-
-        async function carregarHorariosDisponiveis() {
-            const data = document.getElementById('cli-data').value;
-            if (!data) return;
-            dataSelecionada = data;
-
-            const selHora = document.getElementById('cli-hora');
-            selHora.innerHTML = '<option value="">Selecione</option>';
-            for (let h = 9; h <= 19; h++) {
-                const horaStr = `${h.toString().padStart(2, '0')}:00`;
-                selHora.innerHTML += `<option value="${horaStr}">${horaStr}</option>`;
-            }
-            document.getElementById('bloco-hora').classList.remove('hidden');
-        }
-
-        async function carregarFuncionariosLivres() {
-            const hora = document.getElementById('cli-hora').value;
-            if (!hora) return;
-            horaSelecionada = hora;
-
-            const selFunc = document.getElementById('cli-funcionario');
-            selFunc.innerHTML = '<option value="">Leonardo (disponível)</option>';
-            document.getElementById('bloco-funcionario').classList.remove('hidden');
-        }
-
-        async function marcarAgendamento() {
-            mostrarToast("Agendamento marcado com sucesso!", "sucesso");
-            setTimeout(() => location.reload(), 1500);
-        }
-
-        async function carregarMeusAgendamentos() {
-            const lista = document.getElementById('meus-agendamentos-lista');
-            lista.innerHTML = '<div class="p-3 border rounded-lg dark:border-gray-700"><p class="font-medium">Corte com Leonardo</p><p class="text-sm text-gray-500">2025-11-18 às 10:00 - agendado</p></div>';
-        }
-
-        // === FUNCIONÁRIO ===
-        async function carregarAgendaFuncionario() {
-            const lista = document.getElementById('lista-agendamentos-func-pendentes');
-            lista.innerHTML = '<div class="p-2 border-b dark:border-gray-700"><p class="font-medium">Cliente Exemplo - Corte</p><p class="text-sm">18/11 às 10:00</p></div>';
-        }
-
-        async function carregarGanhosFuncionario() {
-            document.getElementById('func-comissao').innerText = 'R$ 150.00';
-            document.getElementById('func-atendimentos').innerText = '5';
-        }
-
-        // === ABAS ===
         function abrirAba(evt, tabName) {
             document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
             document.querySelectorAll('.tab-button').forEach(b => b.classList.remove('active'));
@@ -471,14 +352,6 @@
             evt.currentTarget.classList.add('active');
         }
 
-        function abrirAbaFunc(evt, tabName) {
-            document.querySelectorAll('.tab-content-func').forEach(t => t.classList.add('hidden'));
-            document.querySelectorAll('.tab-button-func').forEach(b => b.classList.remove('active'));
-            document.getElementById(tabName).classList.remove('hidden');
-            evt.currentTarget.classList.add('active');
-        }
-
-        // === INICIALIZAÇÃO ===
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
             const token = urlParams.get('token');
