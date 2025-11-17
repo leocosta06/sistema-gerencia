@@ -9,19 +9,59 @@ app = Flask(__name__, template_folder='templates')
 RENDER_HOST = os.environ.get('RENDER_EXTERNAL_HOSTNAME', 'localhost:8080')
 GERENTE_TOKEN = os.environ.get('GERENTE_TOKEN', 'leonardo123')
 
-# === BANCO DE DADOS SIMULADO ===
+# === BANCO DE DADOS SIMULADO (COM DADOS DE DEMO) ===
 usuarios = {
     "leonardocalmeida2@gmail.com": {
         "id": 1,
-        "nome": "DEMO",
+        "nome": "Leonardo Almeida",
         "senha": "Demo123456",
         "tipo_conta": "gerente"
+    },
+    "func1@salao.com": {
+        "id": 2,
+        "nome": "Maria Silva",
+        "senha": "func123",
+        "tipo_conta": "funcionario"
+    },
+    "cliente1@salao.com": {
+        "id": 3,
+        "nome": "João Pedro",
+        "senha": "cli123",
+        "tipo_conta": "cliente"
     }
 }
 
-agendamentos = {}
+agendamentos = {
+    "1": {
+        "id": "1",
+        "servico_id": "1",
+        "nome_servico": "Corte Masculino",
+        "valor": 50.0,
+        "comissao_percentual": 30,
+        "data_agendamento": "2025-11-17 10:00",
+        "cliente_id": 3,
+        "nome_cliente": "João Pedro",
+        "funcionario_id": 2,
+        "status": "concluido"
+    },
+    "2": {
+        "id": "2",
+        "servico_id": "1",
+        "nome_servico": "Corte Masculino",
+        "valor": 50.0,
+        "comissao_percentual": 30,
+        "data_agendamento": "2025-11-17 14:00",
+        "cliente_id": 3,
+        "nome_cliente": "João Pedro",
+        "funcionario_id": 2,
+        "status": "agendado"
+    }
+}
+
 servicos = {
-    "1": {"nome": "Corte Masculino", "valor": 50.0, "comissao_percentual": 30}
+    "1": {"nome": "Corte Masculino", "valor": 50.0, "comissao_percentual": 30},
+    "2": {"nome": "Barba", "valor": 30.0, "comissao_percentual": 40},
+    "3": {"nome": "Corte + Barba", "valor": 70.0, "comissao_percentual": 35}
 }
 
 # === ROTAS ESTÁTICAS ===
@@ -33,7 +73,7 @@ def index():
 def pagina_redefinir():
     return send_from_directory('templates', 'index.html')
 
-# === LOGIN ===
+# === LOGIN (COM DEMO) ===
 @app.route('/api/login', methods=['POST'])
 def api_login():
     data = request.get_json()
@@ -44,11 +84,7 @@ def api_login():
     if email == "demo@salao.com" and senha == "demo":
         return jsonify({
             "success": True,
-            "user": {
-                "id": 999,
-                "nome": "Demo Gerente",
-                "tipo_conta": "gerente"
-            },
+            "user": {"id": 999, "nome": "Demo", "tipo_conta": "gerente"},
             "demo": True
         })
 
@@ -56,16 +92,12 @@ def api_login():
     if user and user['senha'] == senha:
         return jsonify({
             "success": True,
-            "user": {
-                "id": user["id"],
-                "nome": user["nome"],
-                "tipo_conta": user["tipo_conta"]
-            },
+            "user": {"id": user["id"], "nome": user["nome"], "tipo_conta": user["tipo_conta"]},
             "demo": False
         })
     return jsonify({"success": False, "message": "E-mail ou senha incorretos."})
 
-# === CADASTRO (CLIENTE, FUNCIONÁRIO, GERENTE) ===
+# === CADASTRO ===
 @app.route('/api/cadastrar', methods=['POST'])
 def api_cadastrar():
     data = request.get_json()
@@ -104,14 +136,10 @@ def api_cadastrar():
         "user": {"id": novo_id, "nome": nome, "tipo_conta": tipo_conta}
     })
 
-# === RECUPERAÇÃO DE SENHA (TEMPORARIAMENTE DESATIVADA) ===
+# === RECUPERAÇÃO DE SENHA (DESATIVADA) ===
 # @app.route('/api/recuperar-senha', methods=['POST'])
 # def api_recuperar_senha():
-#     return jsonify({"success": False, "message": "Recuperação de senha temporariamente desativada."})
-#
-# @app.route('/api/redefinir-senha', methods=['POST'])
-# def api_redefinir_senha():
-#     return jsonify({"success": False, "message": "Recuperação de senha temporariamente desativada."})
+#     return jsonify({"success": False, "message": "Recuperação temporariamente desativada."})
 
 # === SERVIÇOS ===
 @app.route('/api/servicos', methods=['GET', 'POST'])
@@ -140,7 +168,7 @@ def api_apagar_servico(id):
     if id in servicos:
         del servicos[id]
         return jsonify({"success": True})
-    return jsonify({"success": False, "message": "Serviço não encontrado."})
+    return jsonify({"success": False, "message": "Não encontrado."})
 
 # === AGENDAMENTOS ===
 @app.route('/api/agendamentos', methods=['GET', 'POST'])
@@ -161,7 +189,7 @@ def api_agendamentos():
         return jsonify({"success": False, "message": "Serviço inválido."})
 
     novo_id = str(max([int(k) for k in agendamentos.keys()], default=0) + 1)
-    cliente = next((u for u in usuarios.values() if u["id"] == int(cliente_id)), None)
+    cliente = usuarios.get(next((e for e, u in usuarios.items() if u["id"] == int(cliente_id)), None), {})
     agendamentos[novo_id] = {
         "id": novo_id,
         "servico_id": servico_id,
@@ -170,7 +198,7 @@ def api_agendamentos():
         "comissao_percentual": servicos[servico_id]["comissao_percentual"],
         "data_agendamento": data_hora,
         "cliente_id": cliente_id,
-        "nome_cliente": cliente["nome"] if cliente else "Cliente",
+        "nome_cliente": cliente.get("nome", "Cliente"),
         "funcionario_id": funcionario_id,
         "status": "agendado"
     }
@@ -178,10 +206,10 @@ def api_agendamentos():
 
 @app.route('/api/agendamentos/<id>/concluir', methods=['PATCH'])
 def api_concluir_agendamento(id):
-    if id not in agendamentos:
-        return jsonify({"success": False, "message": "Não encontrado."})
-    agendamentos[id]["status"] = "concluido"
-    return jsonify({"success": True})
+    if id in agendamentos:
+        agendamentos[id]["status"] = "concluido"
+        return jsonify({"success": True})
+    return jsonify({"success": False, "message": "Não encontrado."})
 
 # === RELATÓRIOS ===
 @app.route('/api/relatorios/financeiro')
@@ -214,12 +242,10 @@ def api_contas():
 
 @app.route('/api/contas/<email>', methods=['DELETE'])
 def api_apagar_conta(email):
-    if email not in usuarios:
-        return jsonify({"success": False, "message": "Não encontrado."})
-    if usuarios[email]["tipo_conta"] == "gerente" and len([u for u in usuarios.values() if u["tipo_conta"] == "gerente"]) == 1:
-        return jsonify({"success": False, "message": "Não pode apagar o último gerente."})
-    del usuarios[email]
-    return jsonify({"success": True})
+    if email in usuarios and usuarios[email]["tipo_conta"] != "gerente" or len([u for u in usuarios.values() if u["tipo_conta"] == "gerente"]) > 1:
+        del usuarios[email]
+        return jsonify({"success": True})
+    return jsonify({"success": False, "message": "Não pode apagar o último gerente."})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)))
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 8080)), debug=True)
